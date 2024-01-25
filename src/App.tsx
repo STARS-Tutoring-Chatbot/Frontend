@@ -1,19 +1,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Route, Routes } from "react-router-dom";
+import Login from "./pages/login/login";
+import Landing from "./pages/landing";
 
 function App() {
   return (
-    <>
-      <div>
-        <h1>STARS AI Tutoring</h1>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde dolor et
-          commodi labore ipsum obcaecati! Explicabo, deleniti quaerat nisi
-          magnam quo eum adipisci officiis itaque earum, voluptas dolor
-          praesentium eligendi?
-        </p>
-      </div>
-    </>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/chat" />
+      <Route path="*" />
+    </Routes>
   );
 }
 
