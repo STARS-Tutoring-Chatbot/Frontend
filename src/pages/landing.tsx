@@ -8,8 +8,14 @@ function Landing() {
   const [searchClass, setSearchClass] = useState("");
   const [chips, setChips] = useState<Chip[]>([]);
 
+  const navigate = useNavigate();
+
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchClass(event.target.value);
+  };
+
+  const handleGetStartedPress = () => {
+    navigate("/login");
   };
 
   // Fetching data for chips. This will be replaced with a data fetch
@@ -73,7 +79,7 @@ function Landing() {
     var isSelectedFlags = [];
     for (let index = 0; index < chips.length; index++) {
       const element = chips[index].title;
-      if (element.includes(searchClass)) {
+      if (element.toLowerCase().includes(searchClass.toLowerCase())) {
         isSelectedFlags.push(index);
       }
     }
@@ -90,7 +96,7 @@ function Landing() {
   }, [searchClass]);
 
   return (
-    <div className="w-screen px-96 py-48 bg-white flex-col justify-center items-center gap-16 inline-flex">
+    <div className="w-screen py-48 bg-white flex-col justify-center items-center gap-16 inline-flex">
       <div className=" h-60 flex-col justify-start items-center gap-8 inline-flex">
         <div className="px-4 py-1 bg-gray-100 rounded-lg justify-start items-center gap-2.5 inline-flex">
           <div className="text-gray-500 text-xs font-medium  leading-tight">
@@ -101,16 +107,16 @@ function Landing() {
           </div>
         </div>
         <div className="self-stretch h-28 flex-col justify-start items-center gap-4 flex">
-          <div className="self-stretch text-center text-gray-800 text-6xl font-extrabold  leading-10">
+          <div className="self-stretch text-center text-gray-800 text-6xl font-extrabold  leading-none">
             FIU STARS GPT
           </div>
           <div className="w-96 text-gray-500 text-sm font-normal  leading-normal">
             STAR’s in-house GPT trained with student’s data guaranteed to assist
             you based on Professor Wells’ requirements.
           </div>
-        </div>
-        <div className="self-stretch justify-center items-start gap-4 inline-flex">
-          <Button>Get Started!</Button>
+          <div className="self-stretch justify-center items-start gap-4 inline-flex">
+            <Button onClick={handleGetStartedPress}>Get Started!</Button>
+          </div>
         </div>
       </div>
 
@@ -140,7 +146,7 @@ function Landing() {
           />
         </div>
 
-        <div className="w-108 justify-center items-start gap-2.5 inline-block text-center">
+        <div className="w-1/2 justify-center items-start gap-2.5 inline-block text-center">
           {chips.map((chip, index) => (
             <Chip
               key={index}
