@@ -11,7 +11,7 @@ function Login() {
   const handleLoginSSOPress = () => {};
   const handleCreateAccountPress = () => {};
 
-  // TODO: continue working on layout
+  // TODO: continue working on layout and fix the button layouts.
   return (
     <div className="w-full h-screen flex">
       <div className="p-16 w-full md:w-1/2 h-full bg-gray-800 md:block hidden">

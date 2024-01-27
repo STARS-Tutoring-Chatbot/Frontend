@@ -20,6 +20,7 @@ function Landing() {
 
   // Fetching data for chips. This will be replaced with a data fetch
   useEffect(() => {
+    // TODO: replace with API call
     setChips([
       {
         title: "CAP 4104 - Human-Computer Interaction",
