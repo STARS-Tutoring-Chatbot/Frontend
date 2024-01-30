@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
-import Chip from "@/components/ui/chip";
+import { Chip, ChipObject } from "@/components/ui/chip";
 import { Input } from "@/components/ui/input";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Landing() {
   const [searchClass, setSearchClass] = useState("");
-  const [chips, setChips] = useState<Chip[]>([]);
+  const [chips, setChips] = useState<ChipObject[]>([]);
 
   const navigate = useNavigate();
 
@@ -20,59 +20,32 @@ function Landing() {
 
   // Fetching data for chips. This will be replaced with a data fetch
   useEffect(() => {
-    // TODO: replace with API call
-    setChips([
-      {
-        title: "CAP 4104 - Human-Computer Interaction",
-        data: "",
-        isSelected: false,
-      },
-      {
-        title: "CDA 3102 - Computer Design/Architecture",
-        data: "",
-        isSelected: false,
-      },
-      {
-        title: "COP 3200 - Introduction to Programming",
-        data: "Data 1",
-        isSelected: false,
-      },
-      {
-        title: "CAP 3456 - Advanced Programming Concepts",
-        data: "Data 2",
-        isSelected: false,
-      },
-      {
-        title: "COP 3890 - Computer Organization and Assembly Language",
-        data: "Data 3",
-        isSelected: false,
-      },
-      {
-        title: "CAP 4120 - User Interface Design",
-        data: "Data 4",
-        isSelected: false,
-      },
-      {
-        title: "COP 4315 - Operating Systems",
-        data: "Data 5",
-        isSelected: false,
-      },
-      {
-        title: "CAP 4983 - Senior Project in Computer Science",
-        data: "Data 6",
-        isSelected: false,
-      },
-      {
-        title: "COP 4764 - Database Systems",
-        data: "Data 7",
-        isSelected: false,
-      },
-      {
-        title: "CAP 4990 - Software Engineering",
-        data: "Data 8",
-        isSelected: false,
-      },
-    ]);
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/chips");
+        const result = await response.json();
+        var chips: ChipObject[] = [];
+        result["data"].forEach(
+          (element: {
+            uid: string;
+            create_at: string;
+            course_id: string;
+            course_name: string;
+          }) => {
+            const chip: ChipObject = {
+              title: element.course_id + " - " + element.course_name,
+              data: element.uid,
+              isSelected: false,
+            };
+            chips.push(chip);
+          }
+        );
+        setChips(chips);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
   }, []);
 
   // controlling UI for chips

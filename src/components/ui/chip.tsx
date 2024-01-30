@@ -1,16 +1,12 @@
 import React, { useEffect } from "react";
 
-type Chip = {
+export type ChipObject = {
   title: string;
   data: string;
   isSelected: boolean;
 };
 
-function Chip(chip: Chip) {
-  useEffect(() => {
-    // Add any side effect logic here
-  }, [chip.isSelected]);
-
+export function Chip(chip: ChipObject) {
   if (chip.isSelected) {
     return (
       <div className="px-4 py-1 bg-lime-300 rounded-lg justify-start items-center gap-2.5 inline-flex mx-1 my-1">
