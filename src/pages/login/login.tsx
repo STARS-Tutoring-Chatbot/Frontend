@@ -56,9 +56,9 @@ function Login() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-
-      console.log("LOGIN PAGE SESSION");
-      console.log(session);
+      if (session != null) {
+        navigate("/chat");
+      }
     });
     const {
       data: { subscription },

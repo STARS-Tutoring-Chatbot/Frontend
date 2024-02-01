@@ -23,7 +23,6 @@ function ProtectedRoutes() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
