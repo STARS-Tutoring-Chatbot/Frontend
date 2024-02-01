@@ -2,6 +2,7 @@ import React, { ChangeEventHandler, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Session, createClient } from "@supabase/supabase-js";
+import { useNavigate } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -12,6 +13,7 @@ function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [session, setSession] = useState<Session | null>(null);
+  const navigate = useNavigate();
 
   const handleUsernameFieldChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -27,13 +29,13 @@ function Login() {
 
   // this either redirects to the messaging page or throws an error state
   const handleLoginPress = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const user = await supabase.auth.signInWithPassword({
       email: username,
       password: password,
     });
-
-    console.log(data);
-    console.log(error);
+    console.log("USER");
+    console.log(user);
+    navigate("/chat");
   };
 
   // Pops up a modal to reset password
@@ -52,24 +54,20 @@ function Login() {
   };
 
   useEffect(() => {
-    // if there is no session active on the browser, then do nothing. However, if there is, then push the protected route.
-
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+
+      console.log("LOGIN PAGE SESSION");
+      console.log(session);
     });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
+
     return () => subscription.unsubscribe();
   }, []);
-
-  // if (!session) {
-  //   return <div>Log in please</div>;
-  // } else {
-  //   return <div>Logged in!</div>;
-  // }
 
   // TODO: continue working on layout and fix the button layouts.
   return (

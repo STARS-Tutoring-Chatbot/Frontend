@@ -9,12 +9,35 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { PaperPlaneIcon, PlusIcon, ExitIcon } from "@radix-ui/react-icons";
 import { useNavigate } from "react-router-dom";
+import MessageWindow from "./messageWindow";
+import { ExitIcon, PlusIcon } from "@radix-ui/react-icons";
+import { AuthError, Session, createClient } from "@supabase/supabase-js";
 
-// TODO: work on auth routes
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_KEY
+);
+
 function ConversationLayout() {
+  const [userConversations, setUserConversations] = useState();
+  const [session, setSession] = useState<Session | null>();
+
+  // on page load
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    console.log(session);
+    return () => subscription.unsubscribe();
+  }, []);
+
   const navigate = useNavigate();
   return (
     <div className="flex flex-col h-screen">
@@ -49,15 +72,11 @@ function ConversationLayout() {
           </div>
         </div>
         <div className="grow shrink basis-0 self-stretch p-2.5 justify-end items-center gap-12 flex">
-          <div className="w-10 h-10 relative">
-            <div className="w-10 h-10 left-0 top-0 absolute bg-slate-200 rounded-full" />
-            <div className="left-[8px] top-[8px] absolute text-slate-900 text-base font-normal  leading-7">
-              CN
-            </div>
-          </div>
+          <div>Welcome, {session?.user.email}</div>
           <Button
             variant="ghost"
             onClick={() => {
+              supabase.auth.signOut();
               navigate("/login");
             }}
           >
@@ -65,7 +84,8 @@ function ConversationLayout() {
           </Button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-0" id="messaging-window">
+
+      {/* <div className="flex-1 overflow-y-auto px-4 py-0" id="messaging-window">
         Chat Messages
       </div>
       <div className="p-4 w-full" id="message-input">
@@ -79,7 +99,8 @@ function ConversationLayout() {
             <PaperPlaneIcon />
           </Button>
         </div>
-      </div>
+      </div> */}
+      <MessageWindow></MessageWindow>
     </div>
   );
 }
