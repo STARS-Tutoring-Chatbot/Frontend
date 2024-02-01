@@ -56,14 +56,15 @@ function Login() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+
+      console.log("LOGIN PAGE SESSION");
+      console.log(session);
     });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
-
-    console.log(session);
 
     return () => subscription.unsubscribe();
   }, []);

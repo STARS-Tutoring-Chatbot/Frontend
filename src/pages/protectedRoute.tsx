@@ -1,6 +1,6 @@
 import { Session, createClient } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet, Navigate, useNavigate } from "react-router-dom";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -9,10 +9,14 @@ const supabase = createClient(
 
 function ProtectedRoutes() {
   const [session, setSession] = useState<Session | null>();
+  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+      if (session == null) {
+        console.log("NO SESSION");
+        navigate("/login");
+      }
     });
     const {
       data: { subscription },
@@ -20,14 +24,10 @@ function ProtectedRoutes() {
       setSession(session);
     });
 
-    console.log("PROTECTED ROUTE: SESSION");
-    console.log(session);
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
-  return true ? <Outlet /> : <Navigate to="/login" />;
+  return <Outlet />;
 }
 
 export default ProtectedRoutes;
