@@ -12,7 +12,9 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import MessageWindow from "./messageWindow";
 import { ExitIcon, PlusIcon } from "@radix-ui/react-icons";
-import { AuthError, Session, createClient } from "@supabase/supabase-js";
+import { Session, createClient } from "@supabase/supabase-js";
+import { useAuth } from "@/util/authprovider";
+import { ConversationInformation } from "@/util/types";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -20,22 +22,29 @@ const supabase = createClient(
 );
 
 function ConversationLayout() {
-  const [userConversations, setUserConversations] = useState();
+  const [userConversations, setUserConversations] = useState<
+    ConversationInformation[] | null | any[]
+  >();
   const [session, setSession] = useState<Session | null>();
+  const auth = useAuth();
 
   // on page load
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    setSession(auth.session);
+    const fetchConversations = async () => {
+      await supabase
+        .from("conversations")
+        .select("*")
+        .eq("owner_id", auth.user?.id)
+        .then(({ data, error }) => {
+          if (error) {
+            throw error;
+          }
+          setUserConversations(data);
+        });
+    };
 
-    console.log(session);
-    return () => subscription.unsubscribe();
+    fetchConversations();
   }, []);
 
   const navigate = useNavigate();
@@ -53,7 +62,13 @@ function ConversationLayout() {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Put Timestamp and Date Ranges</SelectLabel>
-                <SelectItem value="est">1</SelectItem>
+                {userConversations?.map((e: ConversationInformation) => {
+                  return (
+                    <SelectItem value={e.id} key={e.id}>
+                      {e.title}
+                    </SelectItem>
+                  );
+                })}
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -85,21 +100,6 @@ function ConversationLayout() {
         </div>
       </div>
 
-      {/* <div className="flex-1 overflow-y-auto px-4 py-0" id="messaging-window">
-        Chat Messages
-      </div>
-      <div className="p-4 w-full" id="message-input">
-        <div className="flex w-full items-center space-x-2">
-          <Textarea
-            placeholder="Type your message here."
-            className="w-full text-base resize-none block min-h-[5]"
-            rows={1}
-          />
-          <Button type="submit">
-            <PaperPlaneIcon />
-          </Button>
-        </div>
-      </div> */}
       <MessageWindow></MessageWindow>
     </div>
   );

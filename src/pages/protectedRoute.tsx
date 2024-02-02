@@ -1,3 +1,4 @@
+import { useAuth } from "@/util/authprovider";
 import { Session, createClient } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
 import { Outlet, Navigate, useNavigate } from "react-router-dom";
@@ -8,23 +9,11 @@ const supabase = createClient(
 );
 
 function ProtectedRoutes() {
-  const [session, setSession] = useState<Session | null>();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session == null) {
-        console.log("NO SESSION");
-        navigate("/login");
-      }
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+  if (!user) {
+    return <Navigate to={"/login"} />;
+  }
 
   return <Outlet />;
 }
