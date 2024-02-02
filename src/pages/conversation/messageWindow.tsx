@@ -41,8 +41,8 @@ function MessageWindow() {
         <div className="flex w-full items-center space-x-2">
           <Textarea
             placeholder="Type your message here."
-            className="w-full text-base resize-none block min-h-[5]"
-            rows={1}
+            className="w-full text-base block min-h-[5]"
+            rows={3}
           />
           <Button type="submit">
             <PaperPlaneIcon />

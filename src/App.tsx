@@ -5,6 +5,7 @@ import ProtectedRoutes from "./pages/protectedRoute";
 import Login from "./pages/login/login";
 import Landing from "./pages/landing";
 import ConversationLayout from "./pages/conversation/conversationLayout";
+import AuthProvider from "./util/authprovider";
 
 function App() {
   return (

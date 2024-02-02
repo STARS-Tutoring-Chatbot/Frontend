@@ -35,10 +35,11 @@ export type OpenAIResponse = {
 
 // UI Data types for navbar and defines props that is needed for message window to work
 export type ConversationInformation = {
-  name: String;
-  desc: String;
-  id: String;
-  date: Date;
+  created_at: string;
+  description: string;
+  id: string;
+  owner_id: string;
+  title: string;
 };
 
 export type UserMessage = {
