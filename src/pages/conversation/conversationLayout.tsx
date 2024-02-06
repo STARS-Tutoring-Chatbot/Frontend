@@ -16,17 +16,34 @@ import { Session, createClient } from "@supabase/supabase-js";
 import { useAuth } from "@/util/authprovider";
 import { ConversationInformation } from "@/util/types";
 
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command";
+
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_KEY
 );
 
+// TODO: create a
 function NavbarLayout() {
   const [userConversations, setUserConversations] = useState<
     ConversationInformation[] | null | any[]
   >();
+  const [currentConversation, setCurrentConversation] =
+    useState<ConversationInformation | null>(null);
   const [session, setSession] = useState<Session | null>();
   const auth = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   // on page load
   useEffect(() => {
@@ -43,11 +60,28 @@ function NavbarLayout() {
           setUserConversations(data);
         });
     };
-
     fetchConversations();
+
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    console.log(currentConversation);
+    navigate(currentConversation?.id);
+  }, [currentConversation]);
+
+  const onSelectConversationChange = (value: ConversationInformation) => {
+    setCurrentConversation(value);
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <div className="p-4 flex justify-between shadow-md mb-4 h-20" id="navbar">
@@ -55,7 +89,7 @@ function NavbarLayout() {
           <Button>
             <PlusIcon />
           </Button>
-          <Select>
+          <Select onValueChange={onSelectConversationChange}>
             <SelectTrigger>
               <SelectValue placeholder="Select Conversation" />
             </SelectTrigger>
@@ -64,7 +98,7 @@ function NavbarLayout() {
                 <SelectLabel>Put Timestamp and Date Ranges</SelectLabel>
                 {userConversations?.map((e: ConversationInformation) => {
                   return (
-                    <SelectItem value={e.id} key={e.id}>
+                    <SelectItem value={e} key={e.id}>
                       {e.title}
                     </SelectItem>
                   );
@@ -99,6 +133,38 @@ function NavbarLayout() {
           </Button>
         </div>
       </div>
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandInput placeholder="Type a command or search..." />
+        <CommandList>
+          <CommandGroup heading="Conversations">
+            {userConversations?.map((e: ConversationInformation) => {
+              return (
+                <CommandItem
+                  value={e.id}
+                  key={e.id}
+                  onSelect={(value) => {
+                    console.log(value);
+                  }}
+                >
+                  {e.title}
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+          <CommandGroup heading="Commands">
+            <CommandItem>New Conversation</CommandItem>
+            <CommandItem>Settings</CommandItem>
+            <CommandItem
+              onSelect={() => {
+                supabase.auth.signOut();
+              }}
+            >
+              Logout
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+        </CommandList>
+      </CommandDialog>
       <Outlet />
     </div>
   );
