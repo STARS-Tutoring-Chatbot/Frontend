@@ -28,6 +28,7 @@ function Landing() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // TODO: work switch to supabase
         const response = await fetch("http://127.0.0.1:8000/chips");
         const result = await response.json();
         var chips: ChipObject[] = [];

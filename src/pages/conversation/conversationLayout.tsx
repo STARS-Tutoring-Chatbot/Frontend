@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import MessageWindow from "./messageWindow";
 import { ExitIcon, PlusIcon } from "@radix-ui/react-icons";
 import { Session, createClient } from "@supabase/supabase-js";
@@ -21,7 +21,7 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_KEY
 );
 
-function ConversationLayout() {
+function NavbarLayout() {
   const [userConversations, setUserConversations] = useState<
     ConversationInformation[] | null | any[]
   >();
@@ -99,10 +99,9 @@ function ConversationLayout() {
           </Button>
         </div>
       </div>
-
-      <MessageWindow></MessageWindow>
+      <Outlet />
     </div>
   );
 }
 
-export default ConversationLayout;
+export default NavbarLayout;
