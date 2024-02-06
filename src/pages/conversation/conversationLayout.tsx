@@ -38,8 +38,7 @@ function NavbarLayout() {
   const [userConversations, setUserConversations] = useState<
     ConversationInformation[] | null | any[]
   >();
-  const [currentConversation, setCurrentConversation] =
-    useState<ConversationInformation | null>(null);
+  const [currentConversation, setCurrentConversation] = useState<string>("");
   const [session, setSession] = useState<Session | null>();
   const auth = useAuth();
   const navigate = useNavigate();
@@ -74,11 +73,10 @@ function NavbarLayout() {
   }, []);
 
   useEffect(() => {
-    console.log(currentConversation);
-    navigate(currentConversation?.id);
+    navigate(currentConversation);
   }, [currentConversation]);
 
-  const onSelectConversationChange = (value: ConversationInformation) => {
+  const onSelectConversationChange = (value: string) => {
     setCurrentConversation(value);
   };
 
@@ -89,7 +87,10 @@ function NavbarLayout() {
           <Button>
             <PlusIcon />
           </Button>
-          <Select onValueChange={onSelectConversationChange}>
+          <Select
+            onValueChange={onSelectConversationChange}
+            value={currentConversation}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select Conversation" />
             </SelectTrigger>
@@ -98,7 +99,7 @@ function NavbarLayout() {
                 <SelectLabel>Put Timestamp and Date Ranges</SelectLabel>
                 {userConversations?.map((e: ConversationInformation) => {
                   return (
-                    <SelectItem value={e} key={e.id}>
+                    <SelectItem value={e.id} key={e.id}>
                       {e.title}
                     </SelectItem>
                   );
@@ -143,7 +144,7 @@ function NavbarLayout() {
                   value={e.id}
                   key={e.id}
                   onSelect={(value) => {
-                    console.log(value);
+                    setCurrentConversation(value);
                   }}
                 >
                   {e.title}
