@@ -9,9 +9,9 @@ const supabase = createClient(
 );
 
 function ProtectedRoutes() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
 
-  if (!user) {
+  if (!session) {
     return <Navigate to={"/login"} />;
   }
 

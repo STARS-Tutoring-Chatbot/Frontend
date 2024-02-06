@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Session, createClient } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/util/authprovider";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -12,8 +13,9 @@ const supabase = createClient(
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null | undefined>(null);
   const navigate = useNavigate();
+  const auth = useAuth();
 
   const handleUsernameFieldChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -49,24 +51,16 @@ function Login() {
 
   // Do not use
   const handleLogOutPress = async () => {
-    const { error } = await supabase.auth.signOut();
-    console.log((await supabase.auth.getUser()).data.user);
+    await supabase.auth.signOut();
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session != null) {
+    const checkSession = async () => {
+      if (auth.session) {
         navigate("/chat");
       }
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
+    };
+    checkSession();
   }, []);
 
   // TODO: continue working on layout and fix the button layouts.
