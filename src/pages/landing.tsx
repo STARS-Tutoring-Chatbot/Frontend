@@ -1,12 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Chip, ChipObject } from "@/components/ui/chip";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/util/authprovider";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Landing() {
   const [searchClass, setSearchClass] = useState("");
   const [chips, setChips] = useState<ChipObject[]>([]);
+  const auth = useAuth();
 
   const navigate = useNavigate();
 
@@ -15,7 +17,11 @@ function Landing() {
   };
 
   const handleGetStartedPress = () => {
-    navigate("/login");
+    if (auth.user) {
+      navigate("/login");
+    } else {
+      navigate("/chat");
+    }
   };
 
   // Fetching data for chips. This will be replaced with a data fetch
