@@ -9,24 +9,40 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import MessageWindow from "./messageWindow";
 import { ExitIcon, PlusIcon } from "@radix-ui/react-icons";
 import { Session, createClient } from "@supabase/supabase-js";
 import { useAuth } from "@/util/authprovider";
 import { ConversationInformation } from "@/util/types";
 
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command";
+
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_KEY
 );
 
-function ConversationLayout() {
+// TODO: create a
+function NavbarLayout() {
   const [userConversations, setUserConversations] = useState<
     ConversationInformation[] | null | any[]
   >();
+  const [currentConversation, setCurrentConversation] = useState<string>("");
   const [session, setSession] = useState<Session | null>();
   const auth = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   // on page load
   useEffect(() => {
@@ -43,11 +59,27 @@ function ConversationLayout() {
           setUserConversations(data);
         });
     };
-
     fetchConversations();
+
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
   }, []);
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    navigate(currentConversation);
+  }, [currentConversation]);
+
+  const onSelectConversationChange = (value: string) => {
+    setCurrentConversation(value);
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <div className="p-4 flex justify-between shadow-md mb-4 h-20" id="navbar">
@@ -55,7 +87,10 @@ function ConversationLayout() {
           <Button>
             <PlusIcon />
           </Button>
-          <Select>
+          <Select
+            onValueChange={onSelectConversationChange}
+            value={currentConversation}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select Conversation" />
             </SelectTrigger>
@@ -99,10 +134,50 @@ function ConversationLayout() {
           </Button>
         </div>
       </div>
-
-      <MessageWindow></MessageWindow>
+      <CommandDialog open={open} onOpenChange={setOpen}>
+        <CommandInput placeholder="Type a command or search..." />
+        <CommandList>
+          <CommandGroup heading="Conversations">
+            {userConversations?.map((e: ConversationInformation) => {
+              return (
+                <CommandItem
+                  value={e.id}
+                  key={e.id}
+                  onSelect={(value) => {
+                    setCurrentConversation(value);
+                    setOpen(false);
+                  }}
+                >
+                  {e.title}
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+          <CommandGroup heading="Commands">
+            <CommandItem>New Conversation</CommandItem>
+            <CommandItem
+              onSelect={() => {
+                navigate("/chat");
+                setOpen(false);
+              }}
+            >
+              Back to Dashboard
+            </CommandItem>
+            <CommandItem>Settings</CommandItem>
+            <CommandItem
+              onSelect={() => {
+                supabase.auth.signOut();
+              }}
+            >
+              Logout
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+        </CommandList>
+      </CommandDialog>
+      <Outlet />
     </div>
   );
 }
 
-export default ConversationLayout;
+export default NavbarLayout;

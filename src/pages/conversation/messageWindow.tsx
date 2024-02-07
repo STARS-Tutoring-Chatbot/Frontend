@@ -8,6 +8,7 @@ import {
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
 import { createClient } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 // TODO: add as props: conversation: ConversationInformation | null
 function MessageWindow() {
@@ -15,6 +16,8 @@ function MessageWindow() {
   const [messages, setMessages] = useState<(UserMessage | OpenAIResponse)[]>(
     []
   );
+  const [loading, setLoading] = useState<boolean>(false);
+  const { conversationid } = useParams();
 
   useEffect(() => {
     // query Supabase: select * from messages where conversation_id = conversation.id
@@ -35,7 +38,7 @@ function MessageWindow() {
   return (
     <>
       <div className="flex-1 overflow-y-auto px-4 py-0" id="messaging-window">
-        Chat Messages
+        {conversationid}
       </div>
       <div className="p-4 w-full" id="message-input">
         <div className="flex w-full items-center space-x-2">
