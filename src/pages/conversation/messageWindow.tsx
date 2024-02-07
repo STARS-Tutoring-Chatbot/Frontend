@@ -10,7 +10,6 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_KEY
 );
 
-// TODO: add as props: conversation: ConversationInformation | null
 function MessageWindow() {
   // TODO: figure out the message type
   const [messages, setMessages] = useState<any[] | null>([]);
@@ -31,14 +30,7 @@ function MessageWindow() {
     fetchMessages();
   }, [conversationid]);
 
-  async function handleSendMessage(message: any) {
-    /**
-     * send message to OpenAI and process that response.
-     * after response, call setMessages that appends message then OpenAI message
-     * display message in UI
-     * write to DB
-     */
-  }
+  async function handleSendMessage(message: any) {}
 
   return (
     <>
