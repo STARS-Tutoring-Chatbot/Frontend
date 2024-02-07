@@ -145,6 +145,7 @@ function NavbarLayout() {
                   key={e.id}
                   onSelect={(value) => {
                     setCurrentConversation(value);
+                    setOpen(false);
                   }}
                 >
                   {e.title}
@@ -154,6 +155,14 @@ function NavbarLayout() {
           </CommandGroup>
           <CommandGroup heading="Commands">
             <CommandItem>New Conversation</CommandItem>
+            <CommandItem
+              onSelect={() => {
+                navigate("/chat");
+                setOpen(false);
+              }}
+            >
+              Back to Dashboard
+            </CommandItem>
             <CommandItem>Settings</CommandItem>
             <CommandItem
               onSelect={() => {

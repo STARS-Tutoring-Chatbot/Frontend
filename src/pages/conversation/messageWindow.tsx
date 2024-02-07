@@ -16,6 +16,7 @@ function MessageWindow() {
   const [messages, setMessages] = useState<(UserMessage | OpenAIResponse)[]>(
     []
   );
+  const [loading, setLoading] = useState<boolean>(false);
   const { conversationid } = useParams();
 
   useEffect(() => {

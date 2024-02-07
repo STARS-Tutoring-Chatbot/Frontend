@@ -6,6 +6,7 @@ import Login from "./pages/login/login";
 import Landing from "./pages/landing";
 import NavbarLayout from "./pages/conversation/conversationLayout";
 import MessageWindow from "./pages/conversation/messageWindow";
+import ConversationDashboard from "./pages/conversation/conversationDashboard";
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route element={<ProtectedRoutes />}>
         <Route element={<NavbarLayout />} path="/chat">
-          <Route element={<h1>Default</h1>} path=""></Route>
+          <Route element={<ConversationDashboard />} path=""></Route>
           <Route element={<MessageWindow />} path=":conversationid"></Route>
         </Route>
       </Route>
