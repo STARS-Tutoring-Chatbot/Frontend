@@ -1,14 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Tables, getSupabaseClient } from "@/util/supabase";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
 import { createClient } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_KEY
-);
+const supabase = getSupabaseClient();
 
 function MessageWindow() {
   // TODO: figure out the message type
@@ -21,7 +19,7 @@ function MessageWindow() {
       await supabase
         .from("Messages")
         .select("*")
-        .eq("conversation_id", conversationid)
+        .eq("conversation_id", conversationid ?? "")
         .then((res) => {
           setMessages(res.data);
           setLoading(false);
@@ -30,7 +28,7 @@ function MessageWindow() {
     fetchMessages();
   }, [conversationid]);
 
-  async function handleSendMessage(message: any) {}
+  async function handleSendMessage(message: Tables<"Messages">) {}
 
   return (
     <>

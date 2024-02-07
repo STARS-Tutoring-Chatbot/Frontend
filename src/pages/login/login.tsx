@@ -1,14 +1,12 @@
 import React, { ChangeEventHandler, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Session, createClient } from "@supabase/supabase-js";
+import { Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/util/authprovider";
+import { getSupabaseClient } from "@/util/supabase";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_KEY
-);
+const supabase = getSupabaseClient();
 
 function Login() {
   const [username, setUsername] = useState("");

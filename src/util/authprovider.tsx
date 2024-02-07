@@ -1,11 +1,9 @@
 import { Session, User, createClient } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import React from "react";
+import { getSupabaseClient } from "./supabase";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_KEY
-);
+const supabase = getSupabaseClient();
 
 export const AuthContext = createContext<{
   session: Session | null | undefined;

@@ -14,7 +14,7 @@ import MessageWindow from "./messageWindow";
 import { ExitIcon, PlusIcon } from "@radix-ui/react-icons";
 import { Session, createClient } from "@supabase/supabase-js";
 import { useAuth } from "@/util/authprovider";
-import { ConversationInformation } from "@/util/types";
+import { Database, Tables, Enums, getSupabaseClient } from "@/util/supabase";
 
 import {
   Command,
@@ -28,16 +28,12 @@ import {
   CommandShortcut,
 } from "@/components/ui/command";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_KEY
-);
+const supabase = getSupabaseClient();
 
 // TODO: create a
 function NavbarLayout() {
-  const [userConversations, setUserConversations] = useState<
-    ConversationInformation[] | null | any[]
-  >();
+  const [userConversations, setUserConversations] =
+    useState<Tables<"conversations">[]>();
   const [currentConversation, setCurrentConversation] = useState<string>("");
   const [session, setSession] = useState<Session | null>();
   const auth = useAuth();
@@ -51,7 +47,7 @@ function NavbarLayout() {
       await supabase
         .from("conversations")
         .select("*")
-        .eq("owner_id", auth.user?.id)
+        .eq("owner_id", auth.user?.id ?? "")
         .then(({ data, error }) => {
           if (error) {
             throw error;
@@ -97,7 +93,7 @@ function NavbarLayout() {
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Put Timestamp and Date Ranges</SelectLabel>
-                {userConversations?.map((e: ConversationInformation) => {
+                {userConversations?.map((e: Tables<"conversations">) => {
                   return (
                     <SelectItem value={e.id} key={e.id}>
                       {e.title}
@@ -138,7 +134,7 @@ function NavbarLayout() {
         <CommandInput placeholder="Type a command or search..." />
         <CommandList>
           <CommandGroup heading="Conversations">
-            {userConversations?.map((e: ConversationInformation) => {
+            {userConversations?.map((e: Tables<"conversations">) => {
               return (
                 <CommandItem
                   value={e.id}

@@ -1,12 +1,10 @@
 import { useAuth } from "@/util/authprovider";
+import { getSupabaseClient } from "@/util/supabase";
 import { Session, createClient } from "@supabase/supabase-js";
 import React, { useEffect, useState } from "react";
 import { Outlet, Navigate, useNavigate } from "react-router-dom";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_KEY
-);
+const supabase = getSupabaseClient();
 
 function ProtectedRoutes() {
   const { user, session } = useAuth();
