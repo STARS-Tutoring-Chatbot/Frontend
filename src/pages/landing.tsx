@@ -2,12 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Chip, ChipObject } from "@/components/ui/chip";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/util/authprovider";
+import { Tables, getSupabaseClient } from "@/util/supabase";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const supabase = getSupabaseClient();
+
 function Landing() {
   const [searchClass, setSearchClass] = useState("");
-  const [chips, setChips] = useState<ChipObject[]>([]);
+  const [chips, setChips] = useState<Tables<"chips">[]>([]);
   const auth = useAuth();
 
   const navigate = useNavigate();
@@ -27,30 +30,15 @@ function Landing() {
   // Fetching data for chips. This will be replaced with a data fetch
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        // TODO: work switch to supabase
-        const response = await fetch("http://127.0.0.1:8000/chips");
-        const result = await response.json();
-        var chips: ChipObject[] = [];
-        result["data"].forEach(
-          (element: {
-            uid: string;
-            create_at: string;
-            course_id: string;
-            course_name: string;
-          }) => {
-            const chip: ChipObject = {
-              title: element.course_id + " - " + element.course_name,
-              data: element.uid,
-              isSelected: false,
-            };
-            chips.push(chip);
+      await supabase
+        .from("chips")
+        .select("*")
+        .then(({ data, error }) => {
+          if (error) {
+            throw error;
           }
-        );
-        setChips(chips);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+          setChips(data);
+        });
     };
     fetchData();
   }, []);
@@ -59,14 +47,15 @@ function Landing() {
   useEffect(() => {
     var isSelectedFlags = [];
     for (let index = 0; index < chips.length; index++) {
-      const element = chips[index].title;
-      if (element.toLowerCase().includes(searchClass.toLowerCase())) {
+      const element = chips[index].course_name;
+      if (element?.toLowerCase().includes(searchClass.toLowerCase())) {
         isSelectedFlags.push(index);
       }
     }
 
     if (searchClass.length > 3) {
       isSelectedFlags.forEach((i) => {
+        // TODO: figure out how to highlight these
         chips[i].isSelected = true;
       });
     } else {
@@ -131,9 +120,9 @@ function Landing() {
           {chips.map((chip, index) => (
             <Chip
               key={index}
-              data={chip.data}
-              title={chip.title}
-              isSelected={chip.isSelected}
+              data={chip.course_id ?? ""}
+              title={chip.course_name ?? ""}
+              isSelected={false}
             />
           ))}
         </div>
