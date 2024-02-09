@@ -1,26 +1,36 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { getOpenAIResponse } from "@/util/openai.dev";
 import { Tables, getSupabaseClient } from "@/util/supabase";
 import { PaperPlaneIcon } from "@radix-ui/react-icons";
-import { createClient } from "@supabase/supabase-js";
+import { error } from "console";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+
+import { v4 as uuidv4 } from "uuid";
 
 const supabase = getSupabaseClient();
 
 function MessageWindow() {
   // TODO: figure out the message type
-  const [messages, setMessages] = useState<any[] | null>([]);
+  const [messages, setMessages] = useState<Tables<"Messages">[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [userInput, setUserInput] = useState<string>("");
+  const [sendDisabled, setSendDisabled] = useState<boolean>(true);
+
   const { conversationid } = useParams();
 
   useEffect(() => {
+    // get initial messages.
     const fetchMessages = async () => {
       await supabase
         .from("Messages")
         .select("*")
         .eq("conversation_id", conversationid ?? "")
         .then((res) => {
+          if (res.error) {
+            throw res.error;
+          }
           setMessages(res.data);
           setLoading(false);
         });
@@ -28,7 +38,71 @@ function MessageWindow() {
     fetchMessages();
   }, [conversationid]);
 
-  async function handleSendMessage(message: Tables<"Messages">) {}
+  useEffect(() => {
+    if (userInput.length == 0) {
+      setSendDisabled(true);
+    } else {
+      setSendDisabled(false);
+    }
+  }, [userInput]);
+
+  function handleUserInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setUserInput(e.target.value);
+  }
+
+  async function handleSendMessage() {
+    setLoading(true);
+    const newMessage: Tables<"Messages"> = {
+      content: userInput,
+      conversation_id: conversationid ?? "",
+      role: "user",
+      id: uuidv4(),
+      created_at: new Date(
+        Date.now() + 1000 * 60 * -new Date().getTimezoneOffset()
+      )
+        .toISOString()
+        .replace("T", " ")
+        .replace("Z", ""),
+    };
+    console.log(newMessage);
+    messages.push(newMessage);
+    setMessages(messages);
+
+    console.log("messages", messages);
+
+    const openAIResponse = await getOpenAIResponse(
+      messages,
+      conversationid ?? ""
+    );
+
+    if (openAIResponse.message == null || openAIResponse.metadata == null) {
+      return;
+    }
+    const openAIResponseMessage: Tables<"Messages"> | null =
+      openAIResponse.message;
+
+    const openaiMetadata: Tables<"OpenAI-Responses"> | null =
+      openAIResponse.metadata;
+
+    // I will have to fix the assert not null errors
+    const insert = async () => {
+      await supabase
+        .from("Messages")
+        .insert([newMessage, openAIResponseMessage!])
+        .then((res) => {
+          if (res.error) {
+            throw res.error;
+          }
+          setMessages((previous) => [...previous, openAIResponseMessage!]);
+          console.log(messages);
+        });
+
+      await supabase.from("OpenAI-Responses").insert(openAIResponse.metadata!);
+    };
+    insert();
+    setLoading(false);
+    setUserInput("");
+  }
 
   return (
     <>
@@ -37,11 +111,13 @@ function MessageWindow() {
           <div>Loading</div>
         ) : (
           messages?.map((e) => {
-            // Once message component is finished loading, inject into page
-            return <div key={e.role}>{e.content}</div>;
+            return (
+              <div key={e.id} className="">
+                {e.content}
+              </div>
+            );
           })
         )}
-        fsfsdf
       </div>
       <div className="p-4 w-full" id="message-input">
         <div className="flex w-full items-center space-x-2">
@@ -49,8 +125,10 @@ function MessageWindow() {
             placeholder="Type your message here."
             className="w-full text-base block min-h-[5]"
             rows={3}
+            onChange={handleUserInput}
+            value={userInput}
           />
-          <Button type="submit">
+          <Button onClick={handleSendMessage} disabled={sendDisabled}>
             <PaperPlaneIcon />
           </Button>
         </div>
