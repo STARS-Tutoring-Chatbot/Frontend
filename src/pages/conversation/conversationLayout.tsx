@@ -10,28 +10,18 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Outlet, useNavigate } from "react-router-dom";
-import MessageWindow from "./messageWindow";
 import { ExitIcon, PlusIcon } from "@radix-ui/react-icons";
-import { Session, createClient } from "@supabase/supabase-js";
+import { Session } from "@supabase/supabase-js";
 import { useAuth } from "@/util/authprovider";
+import { Tables, getCurrentDate, getSupabaseClient } from "@/util/supabase";
+import { v4 as uuidv4 } from "uuid";
 import {
-  Database,
-  Tables,
-  Enums,
-  getSupabaseClient,
-  getCurrentDate,
-} from "@/util/supabase";
-
-import {
-  Command,
   CommandDialog,
-  CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
   CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/command";
 import {
   Dialog,
@@ -52,9 +42,14 @@ function NavbarLayout() {
     useState<Tables<"conversations">[]>();
   const [currentConversation, setCurrentConversation] = useState<string>("");
   const [session, setSession] = useState<Session | null>();
+  const [open, setOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [inputConversationName, setInputConversationName] =
+    useState<string>("");
+  const [inputConversationDesc, setInputConversationDesc] =
+    useState<string>("");
   const auth = useAuth();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
 
   // on page load
   useEffect(() => {
@@ -88,21 +83,60 @@ function NavbarLayout() {
     navigate(currentConversation);
   }, [currentConversation]);
 
+  const onInputConversationNameChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setInputConversationName(e.target.value);
+  };
+  const onInputConversationDescChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    setInputConversationDesc(e.target.value);
+  };
+
   const onSelectConversationChange = (value: string) => {
     setCurrentConversation(value);
   };
 
   const onAddConversation = () => {
-    // Launch a dialog
+    const uuid = uuidv4();
+    const conversationInformation: Tables<"conversations"> = {
+      id: uuid,
+      created_at: getCurrentDate(),
+      description: inputConversationDesc,
+      title: inputConversationName,
+      owner_id: auth.user?.id ?? "",
+    };
+
+    const insert = async () => {
+      await supabase
+        .from("conversations")
+        .insert(conversationInformation)
+        .then((value) => {
+          if (value.error) {
+            throw value.error;
+          }
+          if (value.status == 201) {
+            console.log(value);
+            setOpenDialog(false);
+            navigate(`${uuid}`);
+          }
+        });
+    };
+    insert();
   };
 
   return (
     <div className="flex flex-col h-screen">
       <div className="p-4 flex justify-between shadow-md mb-4 h-20" id="navbar">
         <div className="grow shrink basis-0 self-stretch p-2 justify-start items-center gap-12 flex">
-          <Dialog>
+          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
             <DialogTrigger>
-              <Button>
+              <Button
+                onClick={() => {
+                  setOpenDialog(true);
+                }}
+              >
                 <PlusIcon />
               </Button>
             </DialogTrigger>
@@ -113,9 +147,19 @@ function NavbarLayout() {
                   Please fill out the following fields.
                 </DialogDescription>
               </DialogHeader>
-              <Input placeholder="Conversation Name" />
-              <Textarea placeholder="Short description of conversation" />
-              <Button>Create New Conversation</Button>
+              <Input
+                placeholder="Conversation Name"
+                value={inputConversationName}
+                onChange={onInputConversationNameChange}
+              />
+              <Textarea
+                placeholder="Short description of conversation"
+                value={inputConversationDesc}
+                onChange={onInputConversationDescChange}
+              />
+              <Button onClick={onAddConversation}>
+                Create New Conversation
+              </Button>
             </DialogContent>
           </Dialog>
           <Select
