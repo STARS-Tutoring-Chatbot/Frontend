@@ -14,7 +14,13 @@ import MessageWindow from "./messageWindow";
 import { ExitIcon, PlusIcon } from "@radix-ui/react-icons";
 import { Session, createClient } from "@supabase/supabase-js";
 import { useAuth } from "@/util/authprovider";
-import { Database, Tables, Enums, getSupabaseClient } from "@/util/supabase";
+import {
+  Database,
+  Tables,
+  Enums,
+  getSupabaseClient,
+  getCurrentDate,
+} from "@/util/supabase";
 
 import {
   Command,
@@ -27,6 +33,16 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@/components/ui/command";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const supabase = getSupabaseClient();
 
@@ -76,13 +92,32 @@ function NavbarLayout() {
     setCurrentConversation(value);
   };
 
+  const onAddConversation = () => {
+    // Launch a dialog
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <div className="p-4 flex justify-between shadow-md mb-4 h-20" id="navbar">
         <div className="grow shrink basis-0 self-stretch p-2 justify-start items-center gap-12 flex">
-          <Button>
-            <PlusIcon />
-          </Button>
+          <Dialog>
+            <DialogTrigger>
+              <Button>
+                <PlusIcon />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>New Conversation</DialogTitle>
+                <DialogDescription>
+                  Please fill out the following fields.
+                </DialogDescription>
+              </DialogHeader>
+              <Input placeholder="Conversation Name" />
+              <Textarea placeholder="Short description of conversation" />
+              <Button>Create New Conversation</Button>
+            </DialogContent>
+          </Dialog>
           <Select
             onValueChange={onSelectConversationChange}
             value={currentConversation}
