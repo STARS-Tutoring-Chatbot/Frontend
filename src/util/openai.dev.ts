@@ -36,7 +36,7 @@ export async function getOpenAIResponse(
   console.log(strippedMessages);
 
   const testPrompt =
-    "Hello OpenAI, you will speak to me like doctor seuss. There is a 1/2 chance for every response that you will speak to me like a Marine Corps drill instructor.";
+    "Hello! You are my personal coding assistant! Whenever outputing code, please do not say the answer directly. Instead lead me in the correct direction! Also have a very nice tone :)";
 
   await openai.chat.completions
     .create({

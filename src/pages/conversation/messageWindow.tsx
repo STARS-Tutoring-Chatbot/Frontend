@@ -111,11 +111,19 @@ function MessageWindow() {
           <div>Loading</div>
         ) : (
           messages?.map((e) => {
-            return (
-              <div key={e.id} className="">
-                {e.content}
-              </div>
-            );
+            if (e.role == "assistant") {
+              return (
+                <div key={e.id} className="text-green-900 ">
+                  <pre className="max-w-fit">{e.content}</pre>
+                </div>
+              );
+            } else {
+              return (
+                <div key={e.id} className="">
+                  <b>{e.content}</b>
+                </div>
+              );
+            }
           })
         )}
       </div>
