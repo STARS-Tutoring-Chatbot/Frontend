@@ -1,21 +1,11 @@
 import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { Textarea } from "@/components/ui/textarea";
 import { getOpenAIResponse } from "@/util/openai.dev";
 import { Tables, getSupabaseClient } from "@/util/supabase";
-import { PaperPlaneIcon, ListBulletIcon } from "@radix-ui/react-icons";
-import { error } from "console";
+import { PaperPlaneIcon, Pencil2Icon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { v4 as uuidv4 } from "uuid";
 import Notes from "./Notes";
@@ -28,7 +18,7 @@ function MessageWindow() {
   const [loading, setLoading] = useState<boolean>(true);
   const [userInput, setUserInput] = useState<string>("");
   const [sendDisabled, setSendDisabled] = useState<boolean>(true);
-  const [openDrawer, setOpenDrawer] = useState<boolean>(false);
+  const [openSheet, setOpenSheet] = useState<boolean>(false);
 
   const { conversationid } = useParams();
 
@@ -118,9 +108,9 @@ function MessageWindow() {
 
   return (
     <>
-      <Drawer open={openDrawer} onOpenChange={setOpenDrawer} direction="right">
+      <Sheet open={openSheet} onOpenChange={setOpenSheet}>
         <Notes></Notes>
-      </Drawer>
+      </Sheet>
       <div className="flex-1 overflow-y-auto px-4 py-0" id="messaging-window">
         {loading ? (
           <div>Loading</div>
@@ -156,10 +146,10 @@ function MessageWindow() {
           </Button>
           <Button
             onClick={() => {
-              setOpenDrawer(true);
+              setOpenSheet(true);
             }}
           >
-            <ListBulletIcon />
+            <Pencil2Icon />
           </Button>
         </div>
       </div>

@@ -1,37 +1,30 @@
-import { Button } from "@/components/ui/button";
+import { BlockNoteView, useBlockNote } from "@blocknote/react";
 
-import { createReactEditorJS } from "react-editor-js";
+import "@blocknote/react/style.css";
 
-const ReactEditorJS = createReactEditorJS();
-
-import {
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 import React from "react";
+import {
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetContent,
+  SheetFooter,
+} from "@/components/ui/sheet";
 
 function Notes() {
+  const editor = useBlockNote({});
+
   return (
-    <DrawerContent>
-      <DrawerHeader>
-        <DrawerTitle>Your Notes</DrawerTitle>
-        <DrawerDescription>
-          Take some notes based on the conversation here! We support Markdown!
-        </DrawerDescription>
-      </DrawerHeader>
-      <ReactEditorJS holder="custom">
-        <div id="custom"></div>
-      </ReactEditorJS>
-      <DrawerFooter>
-        <DrawerClose>
-          <Button variant="outline">Save</Button>
-        </DrawerClose>
-      </DrawerFooter>
-    </DrawerContent>
+    <SheetContent side="notes" className="h-full">
+      <SheetHeader>
+        <SheetTitle>Your Conversation Notes</SheetTitle>
+        <SheetDescription>
+          We support Markdown! Press CTRL+S or ⌘+S to save your notes.
+        </SheetDescription>
+      </SheetHeader>
+      <div className="p-2"></div>
+      <BlockNoteView editor={editor} theme="light"></BlockNoteView>
+    </SheetContent>
   );
 }
 

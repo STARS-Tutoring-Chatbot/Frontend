@@ -39,6 +39,7 @@ const DrawerContent = React.forwardRef<
   <DrawerPortal>
     <DrawerOverlay />
     <DrawerPrimitive.Content
+      data-vaul-no-drag
       ref={ref}
       className={cn(
         "fixed inset-y-0 right-0 z-50 w-3/4 h-screen flex flex-col rounded-t-[10px] border bg-background",
