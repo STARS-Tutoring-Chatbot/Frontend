@@ -109,7 +109,7 @@ function MessageWindow() {
   return (
     <>
       <Sheet open={openSheet} onOpenChange={setOpenSheet}>
-        <Notes></Notes>
+        <Notes conversationID={conversationid}></Notes>
       </Sheet>
       <div className="flex-1 overflow-y-auto px-4 py-0" id="messaging-window">
         {loading ? (

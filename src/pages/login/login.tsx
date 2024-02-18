@@ -11,7 +11,6 @@ const supabase = getSupabaseClient();
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [session, setSession] = useState<Session | null | undefined>(null);
   const navigate = useNavigate();
   const auth = useAuth();
 
@@ -33,8 +32,6 @@ function Login() {
       email: username,
       password: password,
     });
-    console.log("USER");
-    console.log(user);
     navigate("/chat");
   };
 

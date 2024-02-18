@@ -2,7 +2,7 @@ import { BlockNoteView, useBlockNote } from "@blocknote/react";
 
 import "@blocknote/react/style.css";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   SheetHeader,
   SheetTitle,
@@ -11,7 +11,11 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 
-function Notes() {
+type NotesProps = {
+  conversationID: string | undefined;
+};
+
+function Notes({ conversationID }: NotesProps) {
   const editor = useBlockNote({});
 
   return (
