@@ -11,17 +11,19 @@ import ConversationDashboard from "./pages/conversation/conversationDashboard";
 // TODO: fix issue with routing and
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route element={<ProtectedRoutes />}>
-        <Route element={<NavbarLayout />} path="chat">
-          <Route element={<ConversationDashboard />} path="" />
-          <Route element={<MessageWindow />} path=":conversationid" />
+    <>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route element={<ProtectedRoutes />} path="chat">
+          <Route element={<NavbarLayout />}>
+            <Route element={<ConversationDashboard />} path="" />
+            <Route element={<MessageWindow />} path=":conversationid" />
+          </Route>
         </Route>
-      </Route>
-      <Route path="*" element={<h1>404 Not Found</h1>} />
-    </Routes>
+        <Route path="*" element={<h1>404 Not Found</h1>} />
+      </Routes>
+    </>
   );
 }
 

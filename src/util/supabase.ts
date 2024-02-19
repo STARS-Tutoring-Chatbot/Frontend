@@ -96,6 +96,37 @@ export type Database = {
           }
         ];
       };
+      notes: {
+        Row: {
+          blocks: Json | null;
+          conversation_id: string | null;
+          created: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          blocks?: Json | null;
+          conversation_id?: string | null;
+          created?: string;
+          id?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          blocks?: Json | null;
+          conversation_id?: string | null;
+          created?: string;
+          id?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "public_notes_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "conversations";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       "OpenAI-Responses": {
         Row: {
           chat_completion_id: string | null;

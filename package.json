@@ -27,6 +27,7 @@
     "lucide-react": "^0.314.0",
     "openai": "^4.26.1",
     "react": "^18.2.0",
+    "react-autosave": "^0.4.4",
     "react-day-picker": "^8.10.0",
     "react-dom": "^18.2.0",
     "react-editor-js": "^2.1.0",
