@@ -250,7 +250,7 @@ function NavbarLayout() {
           <CommandSeparator />
         </CommandList>
       </CommandDialog>
-      <Outlet />
+      <Outlet></Outlet>
     </div>
   );
 }

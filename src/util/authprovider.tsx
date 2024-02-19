@@ -40,9 +40,6 @@ export default function AuthProvider({ children }: any) {
 
     setData();
 
-    console.log("Provider:");
-    console.log(session, user);
-
     return () => subscription.unsubscribe();
   }, []);
 
