@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { getOpenAIResponse } from "@/util/openai.dev";
 import { Tables, getSupabaseClient } from "@/util/supabase";
-import { PaperPlaneIcon } from "@radix-ui/react-icons";
-import { error } from "console";
+import { PaperPlaneIcon, Pencil2Icon } from "@radix-ui/react-icons";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { v4 as uuidv4 } from "uuid";
+import Notes from "./Notes";
 
 const supabase = getSupabaseClient();
 
@@ -17,6 +18,7 @@ function MessageWindow() {
   const [loading, setLoading] = useState<boolean>(true);
   const [userInput, setUserInput] = useState<string>("");
   const [sendDisabled, setSendDisabled] = useState<boolean>(true);
+  const [openSheet, setOpenSheet] = useState<boolean>(false);
 
   const { conversationid } = useParams();
 
@@ -106,6 +108,9 @@ function MessageWindow() {
 
   return (
     <>
+      <Sheet open={openSheet} onOpenChange={setOpenSheet}>
+        <Notes conversationID={conversationid}></Notes>
+      </Sheet>
       <div className="flex-1 overflow-y-auto px-4 py-0" id="messaging-window">
         {loading ? (
           <div>Loading</div>
@@ -138,6 +143,13 @@ function MessageWindow() {
           />
           <Button onClick={handleSendMessage} disabled={sendDisabled}>
             <PaperPlaneIcon />
+          </Button>
+          <Button
+            onClick={() => {
+              setOpenSheet(true);
+            }}
+          >
+            <Pencil2Icon />
           </Button>
         </div>
       </div>
