@@ -36,7 +36,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 const supabase = getSupabaseClient();
 
-// TODO: create a
+/**
+ *
+ * @deprecated
+ */
 function NavbarLayout() {
   const [userConversations, setUserConversations] =
     useState<Tables<"conversations">[]>();

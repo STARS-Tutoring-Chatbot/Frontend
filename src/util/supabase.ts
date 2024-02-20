@@ -37,6 +37,7 @@ export type Database = {
           created_at: string;
           description: string | null;
           id: string;
+          model: string | null;
           owner_id: string;
           title: string | null;
         };
@@ -44,6 +45,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           id?: string;
+          model?: string | null;
           owner_id: string;
           title?: string | null;
         };
@@ -51,6 +53,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           id?: string;
+          model?: string | null;
           owner_id?: string;
           title?: string | null;
         };
@@ -101,6 +104,7 @@ export type Database = {
           blocks: Json | null;
           conversation_id: string | null;
           created: string;
+          id: string;
           updated_at: string | null;
         };
         Insert: {
