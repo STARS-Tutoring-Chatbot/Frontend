@@ -73,7 +73,7 @@ function Landing() {
             🎉
           </div>
           <div className="text-gray-500 text-xs font-medium  leading-tight">
-            Version 1.0
+            Version Alpha 1.2
           </div>
         </div>
         <div className="self-stretch h-28 flex-col justify-start items-center gap-4 flex">

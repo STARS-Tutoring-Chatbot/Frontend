@@ -2,10 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { getOpenAIResponse } from "@/util/openai.dev";
 import { Tables, getSupabaseClient } from "@/util/supabase";
-import { PaperPlaneIcon, Pencil2Icon } from "@radix-ui/react-icons";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Send, Pencil, ChevronLeft } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Sheet } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { v4 as uuidv4 } from "uuid";
 import Notes from "./Notes";
@@ -19,6 +20,9 @@ function MessageWindow() {
   const [userInput, setUserInput] = useState<string>("");
   const [sendDisabled, setSendDisabled] = useState<boolean>(true);
   const [openSheet, setOpenSheet] = useState<boolean>(false);
+
+  const messageWindowRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const { conversationid } = useParams();
 
@@ -47,6 +51,17 @@ function MessageWindow() {
       setSendDisabled(false);
     }
   }, [userInput]);
+
+  useEffect(() => {
+    if (messageWindowRef.current) {
+      messageWindowRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+        inline: "nearest",
+      });
+      console.log("Scrolling");
+    }
+  }, [messages]);
 
   function handleUserInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setUserInput(e.target.value);
@@ -107,53 +122,80 @@ function MessageWindow() {
   }
 
   return (
-    <>
+    <div className="h-full flex justify-center items-center">
       <Sheet open={openSheet} onOpenChange={setOpenSheet}>
         <Notes conversationID={conversationid}></Notes>
       </Sheet>
-      <div className="flex-1 overflow-y-auto px-4 py-0" id="messaging-window">
+
+      <div
+        id="topbar"
+        className="fixed top-0 flex-row w-full items-center space-x-2 bg-transparent z-10 px-4"
+      >
+        <div className="flex w-full items-center justify-between p-4">
+          <Button
+            variant="outline"
+            onClick={() => {
+              navigate(-1);
+            }}
+          >
+            <ChevronLeft size={20} />
+          </Button>
+
+          <div id="topbar-button-group-left" className="flex space-x-2">
+            <Button variant="outline">Chat Settings</Button>
+            <Button
+              onClick={() => {
+                setOpenSheet(true);
+              }}
+              variant={"default"}
+            >
+              <Pencil size={12} />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <ScrollArea className="mb-32 w-1/2 pt-4">
         {loading ? (
           <div>Loading</div>
         ) : (
           messages?.map((e) => {
             if (e.role == "assistant") {
               return (
-                <div key={e.id} className="text-green-900 ">
-                  <pre className="max-w-fit">{e.content}</pre>
+                <div key={e.id} className="text-green-900 py-2">
+                  <p className="w-full">{e.content}</p>
                 </div>
               );
             } else {
               return (
-                <div key={e.id} className="">
+                <div key={e.id} className="py-2">
                   <b>{e.content}</b>
                 </div>
               );
             }
           })
         )}
-      </div>
-      <div className="p-4 w-full" id="message-input">
-        <div className="flex w-full items-center space-x-2">
+      </ScrollArea>
+
+      <div
+        className="fixed inset-x-0 bottom-0 flex w-full items-center space-x-2 bg-white z-10 px-4 shadow-md border-t-2 border-gray-200"
+        id="message-input"
+        ref={messageWindowRef}
+      >
+        <div className="flex w-full items-center space-x-2 p-4">
           <Textarea
             placeholder="Type your message here."
-            className="w-full text-base block min-h-[5]"
+            className="w-full text-base block"
             rows={3}
             onChange={handleUserInput}
             value={userInput}
           />
           <Button onClick={handleSendMessage} disabled={sendDisabled}>
-            <PaperPlaneIcon />
-          </Button>
-          <Button
-            onClick={() => {
-              setOpenSheet(true);
-            }}
-          >
-            <Pencil2Icon />
+            <Send size={14} />
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

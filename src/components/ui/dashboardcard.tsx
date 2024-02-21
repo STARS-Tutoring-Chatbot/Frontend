@@ -41,7 +41,6 @@ function DashboardCard({
     navigate(`${conversation_id}`);
   };
 
-  // modify the created_at to be more human readable
   const date = created_at ? new Date(created_at).toDateString() : null;
 
   return (
@@ -67,11 +66,15 @@ function DashboardCard({
         </CardContent>
         <CardFooter />
       </div>
-      <div className="flex-none flex items-center py-1 icon-container">
-        <Button variant="ghost" onClick={onTrashClick}>
+      <div className="flex-none flex items-center py-1 icon-container ">
+        <Button variant="ghost" onClick={onTrashClick} className="h-full">
           <TrashIcon width={24} height={24} />
         </Button>
-        <Button variant="ghost" onClick={onGoToConversationClick}>
+        <Button
+          variant="ghost"
+          onClick={onGoToConversationClick}
+          className="h-full"
+        >
           <ChevronRightIcon width={24} height={24} />
         </Button>
       </div>
