@@ -25,6 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import CreateConversationDialog from "./createConversation";
 
 const supabase = getSupabaseClient();
 
@@ -36,23 +38,25 @@ function Dashboard() {
   >([]);
   const [filteredConversations, setFilteredConversations] = useState<
     Tables<"conversations">[] | undefined
-  >([]);
+  >([
+    {
+      title: null,
+      description: null,
+      model: null,
+      created_at: "",
+      id: "",
+      owner_id: "",
+    },
+  ]);
   const [search, setSearch] = useState("");
   const [newConversationDialogOpen, setNewConversationDialogOpen] =
     useState<boolean>(false);
 
-  const [createNewConversationDisabled, setCreateNewConversationDisabled] =
-    useState(true);
-  const [model, setModel] = useState<string>("");
-
-  const [conversationName, setConversationName] = useState("");
-  const [conversationDescription, setConversationDescription] = useState("");
-
   const auth = useAuth();
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
+      // add a 1 second delay to simulate loading
       await supabase
         .from("conversations")
         .select("*")
@@ -62,7 +66,6 @@ function Dashboard() {
             throw error;
           }
           setConversations(data);
-
           // call setFilteredConversations to filteredConversations where it is sorted in reverse order by created_at date
           setFilteredConversations(
             data?.sort((a, b) => {
@@ -76,10 +79,6 @@ function Dashboard() {
         });
     };
     fetchData();
-
-    // set filteredConversations to filteredConversations where it is sorted in reverse order
-
-    console.log(filteredConversations);
   }, []);
 
   useEffect(() => {
@@ -96,32 +95,8 @@ function Dashboard() {
     console.log(filteredConversations);
   }, [search]);
 
-  useEffect(() => {
-    if (conversationName && conversationDescription && model) {
-      setCreateNewConversationDisabled(false);
-    } else {
-      setCreateNewConversationDisabled(true);
-    }
-  }, [model, conversationName, conversationDescription]);
-
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
-  };
-
-  const handleConversationNameChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setConversationName(event.target.value);
-  };
-
-  const handleConversationDescriptionChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
-  ) => {
-    setConversationDescription(event.target.value);
-  };
-
-  const handleModelChange = (str: string) => {
-    setModel(str);
   };
 
   const onLogOutPress = async () => {
@@ -131,29 +106,6 @@ function Dashboard() {
 
   const onSettingsPress = () => {
     // TODO: Implement settings
-  };
-
-  const onCreateConversationPress = async () => {
-    if (auth.user === null) {
-      console.log("Not Logged in");
-      return;
-    }
-    await supabase
-      .from("conversations")
-      .insert({
-        owner_id: auth.user?.id ?? "",
-        title: conversationName,
-        description: conversationDescription,
-        model: model,
-      })
-      .then((res) => {
-        if (res.error) {
-          throw res.error;
-        } else {
-          setNewConversationDialogOpen(false);
-          navigate(0);
-        }
-      });
   };
 
   return (
@@ -171,7 +123,9 @@ function Dashboard() {
                 </div>
                 <Menubar>
                   <MenubarMenu>
-                    <Button variant="ghost">Settings</Button>
+                    <Button variant="ghost" onClick={onSettingsPress}>
+                      Settings
+                    </Button>
                   </MenubarMenu>
                   <MenubarMenu>
                     <Button variant="ghost" onClick={onLogOutPress}>
@@ -237,44 +191,9 @@ function Dashboard() {
         open={newConversationDialogOpen}
         onOpenChange={setNewConversationDialogOpen}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>New Conversation</DialogTitle>
-            <DialogDescription>
-              Please fill out the following fields.
-            </DialogDescription>
-          </DialogHeader>
-          <Input
-            placeholder="Conversation Name"
-            value={conversationName}
-            onChange={handleConversationNameChange}
-          />
-          <Textarea
-            placeholder="Input Conversation Name"
-            value={conversationDescription}
-            onChange={handleConversationDescriptionChange}
-          ></Textarea>
-          <div className="pt-4">
-            Please select the model for your specifc course.
-          </div>
-          <Select value={model} onValueChange={handleModelChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Model" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="GPT-3.5-Turbo">GPT-3.5-Turbo</SelectItem>
-              <SelectItem value="OP-SYS-1-3.5">OP-SYS-1-3.5</SelectItem>
-              <SelectItem value="DSA-1-3.5">DSA-1-3.5</SelectItem>
-              <SelectItem value="PROG1-4.0">PROG1-4.0</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            disabled={createNewConversationDisabled}
-            onClick={onCreateConversationPress}
-          >
-            Create New Conversation
-          </Button>
-        </DialogContent>
+        <CreateConversationDialog
+          setNewConversationDialogOpen={setNewConversationDialogOpen}
+        />
       </Dialog>
     </div>
   );
