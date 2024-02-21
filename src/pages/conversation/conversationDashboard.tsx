@@ -1,6 +1,10 @@
 import { Button } from "@/components/ui/button";
 import React from "react";
 
+/**
+ *
+ * @DEPRECATED
+ */
 function ConversationDashboard() {
   return (
     <div className="flex h-lvh items-center justify-center gap-2.5 ">

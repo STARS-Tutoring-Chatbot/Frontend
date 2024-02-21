@@ -37,6 +37,7 @@ export type Database = {
           created_at: string;
           description: string | null;
           id: string;
+          model: string | null;
           owner_id: string;
           title: string | null;
         };
@@ -44,6 +45,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           id?: string;
+          model?: string | null;
           owner_id: string;
           title?: string | null;
         };
@@ -51,6 +53,7 @@ export type Database = {
           created_at?: string;
           description?: string | null;
           id?: string;
+          model?: string | null;
           owner_id?: string;
           title?: string | null;
         };
@@ -89,6 +92,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "Messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "conversations";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      notes: {
+        Row: {
+          blocks: Json | null;
+          conversation_id: string | null;
+          created: string;
+          id: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          blocks?: Json | null;
+          conversation_id?: string | null;
+          created?: string;
+          id?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          blocks?: Json | null;
+          conversation_id?: string | null;
+          created?: string;
+          id?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "public_notes_conversation_id_fkey";
             columns: ["conversation_id"];
             isOneToOne: false;
             referencedRelation: "conversations";
