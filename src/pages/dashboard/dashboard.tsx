@@ -9,23 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SearchIcon, Plus } from "lucide-react";
 import { useAuth } from "@/util/authprovider";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { Dialog } from "@/components/ui/dialog";
 import CreateConversationDialog from "./createConversation";
 
 const supabase = getSupabaseClient();
@@ -79,6 +63,8 @@ function Dashboard() {
         });
     };
     fetchData();
+
+    console.log(auth.session);
   }, []);
 
   useEffect(() => {

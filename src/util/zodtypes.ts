@@ -2,18 +2,18 @@ import { z } from "zod";
 
 // Use for creating new conversation in dashboard.tsx
 
-const newConversation = z.object({
-  title: z.string(),
-  description: z.string().max(200),
+export const newConversation = z.object({
+  title: z.string().min(10).max(100),
+  description: z.string().min(10).max(500),
   model: z.string(),
 });
 
-const login = z.object({
+export const login = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
 
-const register = z.object({
+export const register = z.object({
   email: z.string().email(),
   password: z.string().min(6),
 });
