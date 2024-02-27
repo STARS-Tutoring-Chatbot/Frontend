@@ -16,6 +16,7 @@ import {
 import { BrainIcon } from "lucide-react";
 import { Button } from "./button";
 import { useNavigate } from "react-router-dom";
+import { Skeleton } from "./skeleton";
 
 type DashboardCardProps = {
   title: string | null;
@@ -43,11 +44,37 @@ function DashboardCard({
 
   const date = created_at ? new Date(created_at).toDateString() : null;
 
+  if (title === null) {
+    return (
+      <Card className="flex my-3">
+        <div className="flex-1">
+          <CardHeader>
+            <CardTitle>
+              <Skeleton className="h-8 w-1/2" />
+            </CardTitle>
+            <CardDescription>
+              <div className="flex items-center space-x-1 pb-2">
+                <Skeleton className="h-4 w-full" />
+              </div>
+              <div className="flex items-center space-x-1">
+                <Skeleton className="h-4 w-full" />
+              </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-4 w-[250px]" />
+          </CardContent>
+          <CardFooter />
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="flex my-3">
       <div className="flex-1">
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle>{title ?? <Skeleton />}</CardTitle>
           <CardDescription>
             <div className="flex items-center space-x-1">
               <CalendarIcon />
