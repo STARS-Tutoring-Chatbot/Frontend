@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { getOpenAIResponse } from "@/util/openai.dev";
 import { Tables, getSupabaseClient } from "@/util/supabase";
@@ -6,6 +5,7 @@ import { Send, Pencil, ChevronLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Sheet } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { v4 as uuidv4 } from "uuid";
@@ -20,14 +20,14 @@ function MessageWindow() {
   const [userInput, setUserInput] = useState<string>("");
   const [sendDisabled, setSendDisabled] = useState<boolean>(true);
   const [openSheet, setOpenSheet] = useState<boolean>(false);
+  const [notes, setNotes] = useState<Tables<"notes">[]>();
 
-  const messageWindowRef = useRef<HTMLDivElement>(null);
+  const lowestDiv = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   const { conversationid } = useParams();
 
   useEffect(() => {
-    // get initial messages.
     const fetchMessages = async () => {
       await supabase
         .from("Messages")
@@ -39,6 +39,17 @@ function MessageWindow() {
           }
           setMessages(res.data);
           setLoading(false);
+        });
+
+      await supabase
+        .from("notes")
+        .select("*")
+        .eq("conversation_id", conversationid ?? "")
+        .then((res) => {
+          if (res.error) {
+            throw res.error;
+          }
+          setNotes(res.data);
         });
     };
     fetchMessages();
@@ -53,13 +64,12 @@ function MessageWindow() {
   }, [userInput]);
 
   useEffect(() => {
-    if (messageWindowRef.current) {
-      messageWindowRef.current.scrollIntoView({
+    if (lowestDiv.current) {
+      lowestDiv.current.scrollIntoView({
         behavior: "smooth",
         block: "end",
         inline: "nearest",
       });
-      console.log("Scrolling");
     }
   }, [messages]);
 
@@ -69,6 +79,7 @@ function MessageWindow() {
 
   async function handleSendMessage() {
     setLoading(true);
+    setSendDisabled(true);
     const newMessage: Tables<"Messages"> = {
       content: userInput,
       conversation_id: conversationid ?? "",
@@ -81,11 +92,8 @@ function MessageWindow() {
         .replace("T", " ")
         .replace("Z", ""),
     };
-    console.log(newMessage);
     messages.push(newMessage);
     setMessages(messages);
-
-    console.log("messages", messages);
 
     const openAIResponse = await getOpenAIResponse(
       messages,
@@ -101,7 +109,6 @@ function MessageWindow() {
     const openaiMetadata: Tables<"OpenAI-Responses"> | null =
       openAIResponse.metadata;
 
-    // I will have to fix the assert not null errors
     const insert = async () => {
       await supabase
         .from("Messages")
@@ -110,21 +117,28 @@ function MessageWindow() {
           if (res.error) {
             throw res.error;
           }
+
           setMessages((previous) => [...previous, openAIResponseMessage!]);
-          console.log(messages);
+          setLoading(false);
+          setSendDisabled(false);
         });
 
-      await supabase.from("OpenAI-Responses").insert(openAIResponse.metadata!);
+      await supabase.from("OpenAI-Responses").insert(openaiMetadata!);
     };
+
     insert();
-    setLoading(false);
     setUserInput("");
   }
 
   return (
     <div className="h-full flex justify-center items-center">
-      <Sheet open={openSheet} onOpenChange={setOpenSheet}>
-        <Notes conversationID={conversationid}></Notes>
+      <Sheet
+        open={openSheet}
+        onOpenChange={(state) => {
+          setOpenSheet(state);
+        }}
+      >
+        <Notes notes={notes} conversationID={conversationid}></Notes>
       </Sheet>
 
       <div
@@ -142,7 +156,15 @@ function MessageWindow() {
           </Button>
 
           <div id="topbar-button-group-left" className="flex space-x-2">
-            <Button variant="outline">Chat Settings</Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                console.log(messages[0].content);
+                console.log(messages);
+              }}
+            >
+              Chat Settings
+            </Button>
             <Button
               onClick={() => {
                 setOpenSheet(true);
@@ -156,31 +178,31 @@ function MessageWindow() {
       </div>
 
       <ScrollArea className="mb-32 w-1/2 pt-4">
-        {loading ? (
-          <div>Loading</div>
-        ) : (
-          messages?.map((e) => {
-            if (e.role == "assistant") {
-              return (
-                <div key={e.id} className="text-green-900 py-2">
-                  <p className="w-full">{e.content}</p>
-                </div>
-              );
-            } else {
-              return (
-                <div key={e.id} className="py-2">
-                  <b>{e.content}</b>
-                </div>
-              );
-            }
-          })
-        )}
+        {messages?.map((e) => {
+          if (e.role == "system") {
+            return;
+          }
+          if (e.role == "assistant") {
+            return (
+              <div key={e.id} className="text-green-900 py-2">
+                <p className="w-full">{e.content}</p>
+              </div>
+            );
+          } else {
+            return (
+              <div key={e.id} className="py-2">
+                <b>{e.content}</b>
+              </div>
+            );
+          }
+        })}
+        {loading && <p>Loading</p>}
+        <div ref={lowestDiv} />
       </ScrollArea>
 
       <div
         className="fixed inset-x-0 bottom-0 flex w-full items-center space-x-2 bg-white z-10 px-4 shadow-md border-t-2 border-gray-200"
         id="message-input"
-        ref={messageWindowRef}
       >
         <div className="flex w-full items-center space-x-2 p-4">
           <Textarea

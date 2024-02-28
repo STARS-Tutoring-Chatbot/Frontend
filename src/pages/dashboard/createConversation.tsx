@@ -19,13 +19,15 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/util/authprovider";
-import { getSupabaseClient } from "@/util/supabase";
+import { getCurrentDate, getSupabaseClient } from "@/util/supabase";
 import { newConversation } from "@/util/zodtypes";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { v4 as uuidv4 } from "uuid";
+import { OpenAIPromptMessage } from "@/util/openai.dev";
 
 const supabase = getSupabaseClient();
 
@@ -58,10 +60,11 @@ function CreateConversationDialog({
   });
 
   async function onSubmit(values: z.infer<typeof newConversation>) {
-    console.log(values);
+    const uid = uuidv4();
     await supabase
       .from("conversations")
       .insert({
+        id: uid,
         owner_id: auth.user?.id ?? "",
         title: values.title,
         description: values.description,
@@ -70,7 +73,28 @@ function CreateConversationDialog({
       .then((res) => {
         if (res.error) {
           throw res.error;
+        }
+      });
+
+    await supabase
+      .from("Messages")
+      .insert({
+        id: uuidv4(),
+        content:
+          OpenAIPromptMessage +
+          "\n\nTitle:" +
+          values.title +
+          "\n\n" +
+          values.description,
+        conversation_id: uid,
+        role: "system",
+        created_at: getCurrentDate(),
+      })
+      .then((res) => {
+        if (res.error) {
+          throw res.error;
         } else {
+          console.log("Created message");
           setNewConversationDialogOpen(false);
           navigate(0);
         }

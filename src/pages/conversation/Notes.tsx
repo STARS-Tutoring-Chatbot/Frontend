@@ -8,18 +8,23 @@ import {
   SheetTitle,
   SheetDescription,
   SheetContent,
-  SheetFooter,
 } from "@/components/ui/sheet";
-import { Autosave, useAutosave } from "react-autosave";
+import { useAutosave } from "react-autosave";
 import { Block } from "@blocknote/core";
-import { getCurrentDate, getSupabaseClient } from "@/util/supabase";
-import { randomInt } from "crypto";
+import {
+  Json,
+  Tables,
+  getCurrentDate,
+  getSupabaseClient,
+} from "@/util/supabase";
+import { json } from "stream/consumers";
 
 type NotesProps = {
   conversationID: string | undefined;
+  notes?: Tables<"notes">[];
 };
 
-function Notes({ conversationID }: NotesProps) {
+function Notes({ conversationID, notes }: NotesProps) {
   // @ts-ignore
   const [blocks, setBlocks] = useState<Block[]>([]);
 
@@ -27,20 +32,18 @@ function Notes({ conversationID }: NotesProps) {
 
   // This useEffect's purpose is to remove all the blocks from the editor when the conversationID changes.
   useEffect(() => {
-    var removeBlock: string[] = [];
-    //@ts-ignore
-    blocks.forEach((block: Block) => {
-      removeBlock.push(block.id);
+    // this only runs once because there are at most 1 notes.
+    console.log("I hate myself");
+    notes?.forEach((note) => {
+      console.log(note);
     });
-    console.log(removeBlock);
-    editor.removeBlocks(removeBlock);
-  }, [conversationID]);
+  }, []);
 
   editor.onEditorContentChange(() => {});
 
   useAutosave({
     data: blocks,
-    interval: 10000,
+    interval: 1000,
     onSave: () => {
       console.log("Autosave Start");
       const supabase = getSupabaseClient();
@@ -58,6 +61,7 @@ function Notes({ conversationID }: NotesProps) {
               throw res;
             }
             console.log("Autosave Complete");
+            console.log(res.data);
           });
       }
     },
@@ -81,7 +85,7 @@ function Notes({ conversationID }: NotesProps) {
           We support Markdown! Press CTRL+S or ⌘+S to save your notes.
         </SheetDescription>
       </SheetHeader>
-      <div className="p-2"></div>
+      <div className="p-2">{JSON.stringify(notes)}</div>
       <BlockNoteView editor={editor} theme="light"></BlockNoteView>
     </SheetContent>
   );
