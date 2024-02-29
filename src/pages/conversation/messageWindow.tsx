@@ -19,8 +19,7 @@ function MessageWindow() {
   const [loading, setLoading] = useState<boolean>(true);
   const [userInput, setUserInput] = useState<string>("");
   const [sendDisabled, setSendDisabled] = useState<boolean>(true);
-  const [openSheet, setOpenSheet] = useState<boolean>(false);
-  const [notes, setNotes] = useState<Tables<"notes">[]>();
+  const [openSheet, setOpenSheet] = useState<boolean>(true);
 
   const lowestDiv = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -29,6 +28,7 @@ function MessageWindow() {
 
   useEffect(() => {
     const fetchMessages = async () => {
+      // @ts-ignore
       await supabase
         .from("Messages")
         .select("*")
@@ -39,17 +39,6 @@ function MessageWindow() {
           }
           setMessages(res.data);
           setLoading(false);
-        });
-
-      await supabase
-        .from("notes")
-        .select("*")
-        .eq("conversation_id", conversationid ?? "")
-        .then((res) => {
-          if (res.error) {
-            throw res.error;
-          }
-          setNotes(res.data);
         });
     };
     fetchMessages();
@@ -110,8 +99,10 @@ function MessageWindow() {
       openAIResponse.metadata;
 
     const insert = async () => {
+      // @ts-ignore
       await supabase
         .from("Messages")
+        // @ts-ignore
         .insert([newMessage, openAIResponseMessage!])
         .then((res) => {
           if (res.error) {
@@ -123,6 +114,7 @@ function MessageWindow() {
           setSendDisabled(false);
         });
 
+      // @ts-ignore
       await supabase.from("OpenAI-Responses").insert(openaiMetadata!);
     };
 
@@ -138,7 +130,7 @@ function MessageWindow() {
           setOpenSheet(state);
         }}
       >
-        <Notes notes={notes} conversationID={conversationid}></Notes>
+        <Notes conversationID={conversationid}></Notes>
       </Sheet>
 
       <div

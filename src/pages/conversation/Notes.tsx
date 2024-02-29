@@ -2,7 +2,7 @@ import { BlockNoteView, useBlockNote } from "@blocknote/react";
 
 import "@blocknote/react/style.css";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   SheetHeader,
   SheetTitle,
@@ -10,63 +10,61 @@ import {
   SheetContent,
 } from "@/components/ui/sheet";
 import { useAutosave } from "react-autosave";
-import { Block, PartialBlock } from "@blocknote/core";
-import {
-  Json,
-  Tables,
-  getCurrentDate,
-  getSupabaseClient,
-} from "@/util/supabase";
-import { parse } from "path";
+import { Block, BlockNoteEditor, PartialBlock } from "@blocknote/core";
+import { Tables, getCurrentDate, getSupabaseClient } from "@/util/supabase";
 
 type NotesProps = {
   conversationID: string | undefined;
   notes?: Tables<"notes">[];
 };
 
-function Notes({ conversationID, notes }: NotesProps) {
+function Notes({ conversationID }: NotesProps) {
   // @ts-ignore
-  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [data, setData] = useState<Block[]>([]);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  useEffect(() => {
-    const parseJSONIntoBlocks = () => {
-      console.log("first");
-      notes?.forEach((note) => {
-        var partialBlocks: PartialBlock<any, any, any>[] = [];
-        let loadedBlocks = note.blocks;
+  const supabase = getSupabaseClient();
 
-        // convert loaded block into an array.
-        loadedBlocks = JSON.stringify(loadedBlocks);
-        try {
-          partialBlocks = JSON.parse(loadedBlocks);
-        } catch (e) {
-          console.log(e);
-        }
-        console.log("first");
-        setBlocks(partialBlocks);
-      });
-    };
-    parseJSONIntoBlocks();
-  }, []);
-
-  const editor = useBlockNote({
-    onEditorContentChange: (editor) => setBlocks(editor.topLevelBlocks),
-    initialContent: blocks,
+  const editor: BlockNoteEditor = useBlockNote({
+    onEditorContentChange: (editor) => setData(editor.topLevelBlocks),
+    async onEditorReady(editor) {
+      await supabase!
+        .from("notes")
+        .select("*")
+        .eq("conversation_id", conversationID ?? "")
+        .then((res) => {
+          if (res.error) {
+            throw res.error;
+          } else {
+            // @ts-ignore
+            let resBlocks = res.data[0].blocks;
+            var partialBlocks: PartialBlock<any, any, any>[] = [];
+            resBlocks = JSON.stringify(resBlocks);
+            partialBlocks = JSON.parse(resBlocks);
+            editor.insertBlocks(
+              // @ts-ignore
+              partialBlocks,
+              editor.getTextCursorPosition().block,
+              "before"
+            );
+          }
+        });
+    },
   });
 
   // This useEffect's purpose is to remove all the blocks from the editor when the conversationID changes.
+
   const saveToSupabase = () => {
     console.log("Autosave Start");
     setIsSaving(true);
-    const supabase = getSupabaseClient();
-    if (blocks.length > 0) {
+    if (data.length > 0) {
+      // @ts-ignore
       supabase
         .from("notes")
         .upsert({
           id: conversationID,
           conversation_id: conversationID,
-          blocks: blocks,
+          blocks: data,
           updated_at: getCurrentDate(),
         })
         .then((res) => {
@@ -81,23 +79,27 @@ function Notes({ conversationID, notes }: NotesProps) {
   };
 
   useAutosave({
-    data: blocks,
+    data,
+    onSave: saveToSupabase,
     interval: 1000,
-    onSave: () => {
-      saveToSupabase();
-    },
   });
 
   return (
     <SheetContent side="notes" className="h-full">
       <SheetHeader>
-        <SheetTitle>Your Conversation Notes</SheetTitle>
+        <SheetTitle
+          onClick={() => {
+            console.log(editor.topLevelBlocks);
+          }}
+        >
+          Your Conversation Notes
+        </SheetTitle>
         <SheetDescription>
           We support Markdown! Press CTRL+S or ⌘+S to save your notes.
         </SheetDescription>
       </SheetHeader>
       <div className="p-2">{isSaving && <h1>Saving</h1>}</div>
-      <BlockNoteView editor={editor} theme="light"></BlockNoteView>
+      {<BlockNoteView editor={editor} theme="light"></BlockNoteView>}
     </SheetContent>
   );
 }
