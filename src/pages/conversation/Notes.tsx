@@ -10,14 +10,14 @@ import {
   SheetContent,
 } from "@/components/ui/sheet";
 import { useAutosave } from "react-autosave";
-import { Block } from "@blocknote/core";
+import { Block, PartialBlock } from "@blocknote/core";
 import {
   Json,
   Tables,
   getCurrentDate,
   getSupabaseClient,
 } from "@/util/supabase";
-import { json } from "stream/consumers";
+import { parse } from "path";
 
 type NotesProps = {
   conversationID: string | undefined;
@@ -27,54 +27,65 @@ type NotesProps = {
 function Notes({ conversationID, notes }: NotesProps) {
   // @ts-ignore
   const [blocks, setBlocks] = useState<Block[]>([]);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  const editor = useBlockNote({});
-
-  // This useEffect's purpose is to remove all the blocks from the editor when the conversationID changes.
   useEffect(() => {
-    // this only runs once because there are at most 1 notes.
-    console.log("I hate myself");
-    notes?.forEach((note) => {
-      console.log(note);
-    });
+    const parseJSONIntoBlocks = () => {
+      console.log("first");
+      notes?.forEach((note) => {
+        var partialBlocks: PartialBlock<any, any, any>[] = [];
+        let loadedBlocks = note.blocks;
+
+        // convert loaded block into an array.
+        loadedBlocks = JSON.stringify(loadedBlocks);
+        try {
+          partialBlocks = JSON.parse(loadedBlocks);
+        } catch (e) {
+          console.log(e);
+        }
+        console.log("first");
+        setBlocks(partialBlocks);
+      });
+    };
+    parseJSONIntoBlocks();
   }, []);
 
-  editor.onEditorContentChange(() => {});
+  const editor = useBlockNote({
+    onEditorContentChange: (editor) => setBlocks(editor.topLevelBlocks),
+    initialContent: blocks,
+  });
+
+  // This useEffect's purpose is to remove all the blocks from the editor when the conversationID changes.
+  const saveToSupabase = () => {
+    console.log("Autosave Start");
+    setIsSaving(true);
+    const supabase = getSupabaseClient();
+    if (blocks.length > 0) {
+      supabase
+        .from("notes")
+        .upsert({
+          id: conversationID,
+          conversation_id: conversationID,
+          blocks: blocks,
+          updated_at: getCurrentDate(),
+        })
+        .then((res) => {
+          if (res.error) {
+            throw res;
+          }
+          console.log("Autosave Complete");
+          console.log(res.data);
+          setIsSaving(false);
+        });
+    }
+  };
 
   useAutosave({
     data: blocks,
     interval: 1000,
     onSave: () => {
-      console.log("Autosave Start");
-      const supabase = getSupabaseClient();
-      if (blocks.length > 0) {
-        supabase
-          .from("notes")
-          .upsert({
-            id: conversationID,
-            conversation_id: conversationID,
-            blocks: blocks,
-            updated_at: getCurrentDate(),
-          })
-          .then((res) => {
-            if (res.error) {
-              throw res;
-            }
-            console.log("Autosave Complete");
-            console.log(res.data);
-          });
-      }
+      saveToSupabase();
     },
-  });
-
-  editor.onEditorContentChange(() => {
-    // @ts-ignore
-    var b: Block = [];
-    // @ts-ignore
-    editor.topLevelBlocks.forEach((block) => {
-      b.push(block);
-    });
-    setBlocks(b);
   });
 
   return (
@@ -85,7 +96,7 @@ function Notes({ conversationID, notes }: NotesProps) {
           We support Markdown! Press CTRL+S or ⌘+S to save your notes.
         </SheetDescription>
       </SheetHeader>
-      <div className="p-2">{JSON.stringify(notes)}</div>
+      <div className="p-2">{isSaving && <h1>Saving</h1>}</div>
       <BlockNoteView editor={editor} theme="light"></BlockNoteView>
     </SheetContent>
   );
