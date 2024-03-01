@@ -61,6 +61,7 @@ function CreateConversationDialog({
 
   async function onSubmit(values: z.infer<typeof newConversation>) {
     const uid = uuidv4();
+    // @ts-ignore
     await supabase
       .from("conversations")
       .insert({
@@ -75,7 +76,7 @@ function CreateConversationDialog({
           throw res.error;
         }
       });
-
+    // @ts-ignore
     await supabase
       .from("Messages")
       .insert({
