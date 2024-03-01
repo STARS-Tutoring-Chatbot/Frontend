@@ -19,7 +19,7 @@ function MessageWindow() {
   const [loading, setLoading] = useState<boolean>(true);
   const [userInput, setUserInput] = useState<string>("");
   const [sendDisabled, setSendDisabled] = useState<boolean>(true);
-  const [openSheet, setOpenSheet] = useState<boolean>(true);
+  const [openSheet, setOpenSheet] = useState<boolean>(false);
 
   const lowestDiv = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();

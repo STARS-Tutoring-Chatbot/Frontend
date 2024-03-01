@@ -24,6 +24,7 @@ type DashboardCardProps = {
   model: string | null;
   created_at: string | null;
   conversation_id: string | null;
+  isLoading?: boolean;
 };
 
 function DashboardCard({
@@ -32,6 +33,7 @@ function DashboardCard({
   model,
   created_at,
   conversation_id,
+  isLoading,
 }: DashboardCardProps) {
   const navigate = useNavigate();
   const onTrashClick = () => {
@@ -44,7 +46,7 @@ function DashboardCard({
 
   const date = created_at ? new Date(created_at).toDateString() : null;
 
-  if (title === null) {
+  if (isLoading) {
     return (
       <Card className="flex my-3">
         <div className="flex-1">

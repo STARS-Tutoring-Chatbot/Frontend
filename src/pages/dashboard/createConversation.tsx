@@ -21,13 +21,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/util/authprovider";
 import { getCurrentDate, getSupabaseClient } from "@/util/supabase";
 import { newConversation } from "@/util/zodtypes";
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
 import { OpenAIPromptMessage } from "@/util/openai.dev";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { create } from "domain";
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 const supabase = getSupabaseClient();
 
@@ -44,6 +48,69 @@ function CreateConversationDialog({
 
   const auth = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const createConversation = useMutation({
+    mutationKey: ["conversations"],
+    mutationFn: async (values: z.infer<typeof newConversation>) => {
+      let newConversationResponse;
+      let newMessageResponse;
+      const uid = uuidv4();
+      //@ts-ignore
+      await supabase
+        .from("conversations")
+        .insert({
+          id: uid,
+          owner_id: auth.user?.id ?? "",
+          title: values.title,
+          description: values.description,
+          model: values.model,
+        })
+        .then((res) => {
+          if (res.error) {
+            throw new Error(res.error.message);
+          }
+          newConversationResponse = res.data;
+        });
+
+      //@ts-ignore
+      await supabase
+        .from("Messages")
+        .insert({
+          id: uuidv4(),
+          content:
+            OpenAIPromptMessage +
+            "\n\nTitle:" +
+            values.title +
+            "\n\n" +
+            values.description,
+          conversation_id: uid,
+          role: "system",
+          created_at: getCurrentDate(),
+        })
+        .then((res) => {
+          if (res.error) {
+            throw new Error(res.error.message);
+          }
+          newMessageResponse = res.data;
+        });
+
+      console.log({ newConversationResponse, newMessageResponse });
+      return { newConversationResponse, newMessageResponse };
+    },
+    onError: (error) => {
+      console.log(error);
+      toast({
+        title: "An Error has Occured",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+    },
+    onSuccess: () => {
+      setNewConversationDialogOpen(false);
+      navigate(0);
+    },
+  });
 
   const form = useForm<z.infer<typeof newConversation>>({
     resolver: zodResolver(newConversation),
@@ -59,49 +126,6 @@ function CreateConversationDialog({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof newConversation>) {
-    const uid = uuidv4();
-    // @ts-ignore
-    await supabase
-      .from("conversations")
-      .insert({
-        id: uid,
-        owner_id: auth.user?.id ?? "",
-        title: values.title,
-        description: values.description,
-        model: values.model,
-      })
-      .then((res) => {
-        if (res.error) {
-          throw res.error;
-        }
-      });
-    // @ts-ignore
-    await supabase
-      .from("Messages")
-      .insert({
-        id: uuidv4(),
-        content:
-          OpenAIPromptMessage +
-          "\n\nTitle:" +
-          values.title +
-          "\n\n" +
-          values.description,
-        conversation_id: uid,
-        role: "system",
-        created_at: getCurrentDate(),
-      })
-      .then((res) => {
-        if (res.error) {
-          throw res.error;
-        } else {
-          console.log("Created message");
-          setNewConversationDialogOpen(false);
-          navigate(0);
-        }
-      });
-  }
-
   useEffect(() => {
     if (conversationName && conversationDescription && model) {
       setCreateNewConversationDisabled(false);
@@ -112,9 +136,18 @@ function CreateConversationDialog({
 
   return (
     <DialogContent>
+      <div className="absolute bottom-0 right-0">
+        <Toaster></Toaster>
+      </div>
+
       <DialogTitle>Create New Conversation</DialogTitle>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+        <form
+          onSubmit={form.handleSubmit((values) => {
+            createConversation.mutate(values);
+          })}
+          className="space-y-2"
+        >
           <FormField
             control={form.control}
             name="title"
@@ -153,7 +186,10 @@ function CreateConversationDialog({
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Select {...field}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select Model" />
                     </SelectTrigger>
@@ -175,6 +211,7 @@ function CreateConversationDialog({
               </FormItem>
             )}
           />
+          <div className="p-4" />
           <Button type="submit">Submit</Button>
         </form>
       </Form>

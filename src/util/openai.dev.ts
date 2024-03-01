@@ -43,7 +43,6 @@ export async function getOpenAIResponse(
       n: 1,
     })
     .then((res) => {
-      console.log("RES = ", res);
       const messageID = uuidv4();
       const metadataID = uuidv4();
       const time = new Date(

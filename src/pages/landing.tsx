@@ -21,7 +21,6 @@ function Landing() {
     queryKey: ["chips"],
     queryFn: async () => {
       const res = await supabase?.from("chips").select("*");
-
       if (res?.error) {
         throw res.error;
       }
