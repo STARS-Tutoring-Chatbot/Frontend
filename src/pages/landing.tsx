@@ -6,6 +6,8 @@ import { Tables, getSupabaseClient } from "@/util/supabase";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { useQuery } from "@tanstack/react-query";
+
 const supabase = getSupabaseClient();
 
 function Landing() {
@@ -14,6 +16,23 @@ function Landing() {
   const auth = useAuth();
 
   const navigate = useNavigate();
+
+  const { data, error } = useQuery({
+    queryKey: ["chips"],
+    queryFn: async () => {
+      const res = await supabase?.from("chips").select("*");
+      if (res?.error) {
+        throw res.error;
+      }
+      console.log(res?.data);
+      return res?.data;
+    },
+  });
+
+  // Fetching data for chips. This will be replaced with a data fetch
+  useEffect(() => {
+    setChips(data ?? []);
+  }, [data, error]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchClass(event.target.value);
@@ -26,22 +45,6 @@ function Landing() {
       navigate("/chat");
     }
   };
-
-  // Fetching data for chips. This will be replaced with a data fetch
-  useEffect(() => {
-    const fetchData = async () => {
-      await supabase
-        .from("chips")
-        .select("*")
-        .then(({ data, error }) => {
-          if (error) {
-            throw error;
-          }
-          setChips(data);
-        });
-    };
-    fetchData();
-  }, []);
 
   // controlling UI for chips
   useEffect(() => {

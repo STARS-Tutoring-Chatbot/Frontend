@@ -11,6 +11,11 @@ import { SearchIcon, Plus } from "lucide-react";
 import { useAuth } from "@/util/authprovider";
 import { Dialog } from "@/components/ui/dialog";
 import CreateConversationDialog from "./createConversation";
+import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
+import { ToastAction } from "@/components/ui/toast";
+import { Toaster } from "@/components/ui/toaster";
+import { useNavigate } from "react-router-dom";
 
 const supabase = getSupabaseClient();
 
@@ -35,37 +40,58 @@ function Dashboard() {
   const [search, setSearch] = useState("");
   const [newConversationDialogOpen, setNewConversationDialogOpen] =
     useState<boolean>(false);
-
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const auth = useAuth();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // add a 1 second delay to simulate loading
-      await supabase
-        .from("conversations")
+  const { data, error, isFetching } = useQuery({
+    queryKey: ["conversations"],
+    queryFn: async () => {
+      await new Promise((r) => setTimeout(r, 1000));
+      const res = await supabase
+        ?.from("conversations") // THROW ERROR HERE
         .select("*")
-        .eq("owner_id", auth.user?.id ?? "")
-        .then(({ data, error }) => {
-          if (error) {
-            throw error;
-          }
-          setConversations(data);
-          // call setFilteredConversations to filteredConversations where it is sorted in reverse order by created_at date
-          setFilteredConversations(
-            data?.sort((a, b) => {
-              if (a.created_at < b.created_at) {
-                return 1;
-              } else {
-                return -1;
-              }
-            })
-          );
-        });
-    };
-    fetchData();
+        .eq("owner_id", auth.user?.id ?? "");
+      if (res?.error) {
+        throw res.error;
+      }
+      return res?.data as Tables<"conversations">[];
+    },
+    retry: 3,
+  });
 
-    console.log(auth.session);
-  }, []);
+  useEffect(() => {
+    setConversations(data);
+    setFilteredConversations(
+      data?.sort((a, b) => {
+        if (a.created_at < b.created_at) {
+          return 1;
+        } else {
+          return -1;
+        }
+      })
+    );
+  }, [data]);
+
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "An Error has Occured",
+        description: "Please try again later.",
+        variant: "destructive",
+        action: (
+          <ToastAction
+            altText="Goto schedule to undo"
+            onClick={() => {
+              navigate(0);
+            }}
+          >
+            Reload
+          </ToastAction>
+        ),
+      });
+    }
+  }, [error]);
 
   useEffect(() => {
     const filterConversations = () => {
@@ -78,7 +104,6 @@ function Dashboard() {
       setFilteredConversations(filteredConvo);
     };
     filterConversations();
-    console.log(filteredConversations);
   }, [search]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,13 +111,10 @@ function Dashboard() {
   };
 
   const onLogOutPress = async () => {
-    await supabase.auth.signOut();
-    console.log("Logged out");
+    await supabase?.auth.signOut();
   };
 
-  const onSettingsPress = () => {
-    // TODO: Implement settings
-  };
+  const onSettingsPress = () => {};
 
   return (
     <div className="flex justify-center overflow-none">
@@ -100,6 +122,7 @@ function Dashboard() {
         <div id="utility-card" className="mt-8">
           <Card className="space-y-2">
             <CardContent>
+              {error && <Toaster />}
               <div
                 id="menubar"
                 className="justify-between items-center inline-flex w-full mt-6"
@@ -156,16 +179,28 @@ function Dashboard() {
         </div>
         <div id="card" className="overflow-y-auto">
           <ScrollArea>
-            {filteredConversations?.map((conversation) => (
+            {!isFetching &&
+              filteredConversations?.map((conversation) => (
+                <DashboardCard
+                  key={conversation.id}
+                  title={conversation.title}
+                  description={conversation.description}
+                  model={conversation.model}
+                  created_at={conversation.created_at}
+                  conversation_id={conversation.id}
+                />
+              ))}
+            {isFetching && (
               <DashboardCard
-                key={conversation.id}
-                title={conversation.title}
-                description={conversation.description}
-                model={conversation.model}
-                created_at={conversation.created_at}
-                conversation_id={conversation.id}
+                key=""
+                title=""
+                description=""
+                model=""
+                created_at=""
+                conversation_id=""
+                isLoading={true}
               />
-            ))}
+            )}
           </ScrollArea>
           <Button className="w-full" variant="outline">
             Deleted Conversations

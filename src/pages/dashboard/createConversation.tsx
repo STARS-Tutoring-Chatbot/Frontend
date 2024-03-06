@@ -19,13 +19,16 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/util/authprovider";
-import { getSupabaseClient } from "@/util/supabase";
+import { getCurrentDate, getSupabaseClient } from "@/util/supabase";
 import { newConversation } from "@/util/zodtypes";
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { v4 as uuidv4 } from "uuid";
+import { OpenAIPromptMessage } from "@/util/openai.dev";
+import { useMutation } from "@tanstack/react-query";
 
 const supabase = getSupabaseClient();
 
@@ -43,6 +46,63 @@ function CreateConversationDialog({
   const auth = useAuth();
   const navigate = useNavigate();
 
+  const createConversation = useMutation({
+    mutationKey: ["conversations"],
+    mutationFn: async (values: z.infer<typeof newConversation>) => {
+      let newConversationResponse;
+      let newMessageResponse;
+      const uid = uuidv4();
+      //@ts-ignore
+      await supabase
+        .from("conversations")
+        .insert({
+          id: uid,
+          owner_id: auth.user?.id ?? "",
+          title: values.title,
+          description: values.description,
+          model: values.model,
+        })
+        .then((res) => {
+          if (res.error) {
+            throw new Error(res.error.message);
+          }
+          newConversationResponse = res.data;
+        });
+
+      //@ts-ignore
+      await supabase
+        .from("Messages")
+        .insert({
+          id: uuidv4(),
+          content:
+            OpenAIPromptMessage +
+            "\n\nTitle:" +
+            values.title +
+            "\n\n" +
+            values.description,
+          conversation_id: uid,
+          role: "system",
+          created_at: getCurrentDate(),
+        })
+        .then((res) => {
+          if (res.error) {
+            throw new Error(res.error.message);
+          }
+          newMessageResponse = res.data;
+        });
+
+      console.log({ newConversationResponse, newMessageResponse });
+      return { newConversationResponse, newMessageResponse };
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+    onSuccess: () => {
+      setNewConversationDialogOpen(false);
+      navigate(0);
+    },
+  });
+
   const form = useForm<z.infer<typeof newConversation>>({
     resolver: zodResolver(newConversation),
     defaultValues: {
@@ -57,26 +117,6 @@ function CreateConversationDialog({
     },
   });
 
-  async function onSubmit(values: z.infer<typeof newConversation>) {
-    console.log(values);
-    await supabase
-      .from("conversations")
-      .insert({
-        owner_id: auth.user?.id ?? "",
-        title: values.title,
-        description: values.description,
-        model: values.model,
-      })
-      .then((res) => {
-        if (res.error) {
-          throw res.error;
-        } else {
-          setNewConversationDialogOpen(false);
-          navigate(0);
-        }
-      });
-  }
-
   useEffect(() => {
     if (conversationName && conversationDescription && model) {
       setCreateNewConversationDisabled(false);
@@ -89,7 +129,12 @@ function CreateConversationDialog({
     <DialogContent>
       <DialogTitle>Create New Conversation</DialogTitle>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+        <form
+          onSubmit={form.handleSubmit((values) => {
+            createConversation.mutate(values);
+          })}
+          className="space-y-2"
+        >
           <FormField
             control={form.control}
             name="title"
@@ -128,7 +173,10 @@ function CreateConversationDialog({
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Select {...field}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select Model" />
                     </SelectTrigger>
@@ -150,6 +198,7 @@ function CreateConversationDialog({
               </FormItem>
             )}
           />
+          <div className="p-4" />
           <Button type="submit">Submit</Button>
         </form>
       </Form>

@@ -271,12 +271,17 @@ export type Enums<
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never;
 
+let supabaseInstance: ReturnType<typeof createClient> | null = null;
+
 export function getSupabaseClient() {
-  const supabase = createClient<Database>(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_KEY
-  );
-  return supabase;
+  if (!supabaseInstance) {
+    // @ts-ignore
+    supabaseInstance = createClient<Database>(
+      import.meta.env.VITE_SUPABASE_URL,
+      import.meta.env.VITE_SUPABASE_KEY
+    );
+  }
+  return supabaseInstance;
 }
 
 export function getCurrentDate() {

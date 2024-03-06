@@ -33,19 +33,16 @@ export async function getOpenAIResponse(
   var message: Tables<"Messages"> | null = null;
   var metadata: Tables<"OpenAI-Responses"> | null = null;
 
-  console.log(strippedMessages);
-
   const testPrompt =
     "Hello! You are my personal coding assistant! Whenever outputing code, please do not say the answer directly. Instead lead me in the correct direction! Also have a very nice tone :)";
 
   await openai.chat.completions
     .create({
       messages: [{ role: "system", content: testPrompt }, ...strippedMessages],
-      model: "gpt-3.5-turbo",
+      model: "gpt-4-turbo-preview",
       n: 1,
     })
     .then((res) => {
-      console.log("RES = ", res);
       const messageID = uuidv4();
       const metadataID = uuidv4();
       const time = new Date(
@@ -87,3 +84,6 @@ export async function getOpenAIResponse(
     metadata: metadata,
   };
 }
+
+export const OpenAIPromptMessage =
+  "Hello you are a Tutoring Chatbot. You will help the user figure out the answer to their coding problems. You will not give the answer directly. You will guide the user in the right direction. You will also have a very nice tone and helpful tone. Below, is the user's query, it should be a baseline to help you guide the user in the right direction.\n\nUser Query:\n\n";
