@@ -2,7 +2,7 @@ import { BlockNoteView, useBlockNote } from "@blocknote/react";
 
 import "@blocknote/react/style.css";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SheetHeader,
   SheetTitle,
@@ -10,8 +10,16 @@ import {
   SheetContent,
 } from "@/components/ui/sheet";
 import { useAutosave } from "react-autosave";
-import { Block, BlockNoteEditor, PartialBlock } from "@blocknote/core";
+import {
+  Block,
+  BlockIdentifier,
+  BlockNoteEditor,
+  PartialBlock,
+} from "@blocknote/core";
 import { Tables, getCurrentDate, getSupabaseClient } from "@/util/supabase";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 type NotesProps = {
   conversationID: string | undefined;
@@ -21,85 +29,122 @@ type NotesProps = {
 function Notes({ conversationID }: NotesProps) {
   // @ts-ignore
   const [data, setData] = useState<Block[]>([]);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-
   const supabase = getSupabaseClient();
 
-  const editor: BlockNoteEditor = useBlockNote({
-    onEditorContentChange: (editor) => setData(editor.topLevelBlocks),
-    async onEditorReady(editor) {
-      await supabase!
-        .from("notes")
-        .select("*")
-        .eq("conversation_id", conversationID ?? "")
-        .then((res) => {
-          if (res.error) {
-            throw res.error;
-          } else {
-            // @ts-ignore
-            let resBlocks = res.data[0].blocks;
-            var partialBlocks: PartialBlock<any, any, any>[] = [];
-            resBlocks = JSON.stringify(resBlocks);
-            partialBlocks = JSON.parse(resBlocks);
-            editor.insertBlocks(
-              // @ts-ignore
-              partialBlocks,
-              editor.getTextCursorPosition().block,
-              "before"
-            );
-          }
-        });
-    },
-  });
+  const { toast, dismiss } = useToast();
 
-  // This useEffect's purpose is to remove all the blocks from the editor when the conversationID changes.
+  // listen for when the user presses CTRL+S or ⌘+S
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+        event.preventDefault();
+        saveNotes.mutate();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
-  const saveToSupabase = () => {
-    console.log("Autosave Start");
-    setIsSaving(true);
-    if (data.length > 0) {
-      // @ts-ignore
-      supabase
-        .from("notes")
-        .upsert({
+  const saveNotes = useMutation({
+    mutationKey: ["saveNotes"],
+    mutationFn: async () => {
+      toast({
+        title: "✍️ Saving",
+        description: "Saving your notes.",
+      });
+      // delay 500ms
+      if (data.length > 0) {
+        // @ts-ignore
+        const res = await supabase.from("notes").upsert({
           id: conversationID,
           conversation_id: conversationID,
           blocks: data,
           updated_at: getCurrentDate(),
-        })
-        .then((res) => {
-          if (res.error) {
-            throw res;
-          }
-          console.log("Autosave Complete");
-          console.log(res.data);
-          setIsSaving(false);
         });
-    }
-  };
+        if (res.error) {
+          toast({
+            title: "❌ Error",
+            description: "Failed to save your notes. Please try again later.",
+          });
+          throw res.error;
+        }
+        dismiss();
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "✅ Saved",
+        description: "Your notes have been saved!",
+        duration: 750,
+      });
+    },
+  });
+
+  const fetchInitialNotes = useQuery({
+    queryKey: ["fetchNotes"],
+    enabled: false,
+    queryFn: async () => {
+      // @ts-ignore
+      const res = await supabase
+        .from("notes")
+        .select("*")
+        .eq("conversation_id", conversationID ?? "");
+
+      if (res.error) {
+        throw res.error;
+      }
+
+      return res.data as Tables<"notes">[];
+    },
+  });
+
+  const editor: BlockNoteEditor = useBlockNote({
+    onEditorContentChange: (editor) => setData(editor.topLevelBlocks),
+    async onEditorReady(editor) {
+      let resBlocks = (await fetchInitialNotes.refetch()).data![0];
+      if (resBlocks) {
+        // delete all current blocks
+        let initBlockIDs: BlockIdentifier[] = [];
+        editor.topLevelBlocks.forEach((element) => {
+          initBlockIDs.push(element.id);
+        });
+        editor.removeBlocks(initBlockIDs);
+
+        // loadin blocks from supabase
+        var partialBlocks: PartialBlock<any, any, any>[] = [];
+        let jsonString = JSON.stringify(resBlocks.blocks);
+        partialBlocks = JSON.parse(jsonString);
+        editor.insertBlocks(
+          // @ts-ignore
+          partialBlocks,
+          editor.getTextCursorPosition().block,
+          "before"
+        );
+      }
+    },
+  });
 
   useAutosave({
     data,
-    onSave: saveToSupabase,
-    interval: 1000,
+    onSave: () => {
+      saveNotes.mutate();
+    },
+    interval: 10000,
   });
 
   return (
     <SheetContent side="notes" className="h-full">
       <SheetHeader>
-        <SheetTitle
-          onClick={() => {
-            console.log(editor.topLevelBlocks);
-          }}
-        >
-          Your Conversation Notes
-        </SheetTitle>
+        <SheetTitle>Your Conversation Notes</SheetTitle>
         <SheetDescription>
           We support Markdown! Press CTRL+S or ⌘+S to save your notes.
         </SheetDescription>
       </SheetHeader>
-      <div className="p-2">{isSaving && <h1>Saving</h1>}</div>
+      <div className="p-2"></div>
       {<BlockNoteView editor={editor} theme="light"></BlockNoteView>}
+      <Toaster />
     </SheetContent>
   );
 }

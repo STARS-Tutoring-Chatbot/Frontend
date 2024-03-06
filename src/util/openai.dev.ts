@@ -39,7 +39,7 @@ export async function getOpenAIResponse(
   await openai.chat.completions
     .create({
       messages: [{ role: "system", content: testPrompt }, ...strippedMessages],
-      model: "gpt-3.5-turbo",
+      model: "gpt-4-turbo-preview",
       n: 1,
     })
     .then((res) => {

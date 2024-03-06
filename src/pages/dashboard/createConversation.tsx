@@ -28,10 +28,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
 import { OpenAIPromptMessage } from "@/util/openai.dev";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { create } from "domain";
-import { useToast } from "@/components/ui/use-toast";
-import { Toaster } from "@/components/ui/toaster";
+import { useMutation } from "@tanstack/react-query";
 
 const supabase = getSupabaseClient();
 
@@ -48,7 +45,6 @@ function CreateConversationDialog({
 
   const auth = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const createConversation = useMutation({
     mutationKey: ["conversations"],
@@ -100,11 +96,6 @@ function CreateConversationDialog({
     },
     onError: (error) => {
       console.log(error);
-      toast({
-        title: "An Error has Occured",
-        description: "Please try again later",
-        variant: "destructive",
-      });
     },
     onSuccess: () => {
       setNewConversationDialogOpen(false);
@@ -136,10 +127,6 @@ function CreateConversationDialog({
 
   return (
     <DialogContent>
-      <div className="absolute bottom-0 right-0">
-        <Toaster></Toaster>
-      </div>
-
       <DialogTitle>Create New Conversation</DialogTitle>
       <Form {...form}>
         <form

@@ -43,10 +43,10 @@ function Dashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const auth = useAuth();
-  const { data, error, isLoading } = useQuery({
+
+  const { data, error, isFetching } = useQuery({
     queryKey: ["conversations"],
     queryFn: async () => {
-      // wait one second
       await new Promise((r) => setTimeout(r, 1000));
       const res = await supabase
         ?.from("conversations") // THROW ERROR HERE
@@ -55,10 +55,9 @@ function Dashboard() {
       if (res?.error) {
         throw res.error;
       }
-      console.log(res?.data);
       return res?.data as Tables<"conversations">[];
     },
-    retry: 1,
+    retry: 3,
   });
 
   useEffect(() => {
@@ -76,8 +75,6 @@ function Dashboard() {
 
   useEffect(() => {
     if (error) {
-      console.log("Error fetching conversations");
-      console.log(error);
       toast({
         title: "An Error has Occured",
         description: "Please try again later.",
@@ -107,7 +104,6 @@ function Dashboard() {
       setFilteredConversations(filteredConvo);
     };
     filterConversations();
-    console.log(filteredConversations);
   }, [search]);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +112,6 @@ function Dashboard() {
 
   const onLogOutPress = async () => {
     await supabase?.auth.signOut();
-    console.log("Logged out");
   };
 
   const onSettingsPress = () => {};
@@ -184,7 +179,7 @@ function Dashboard() {
         </div>
         <div id="card" className="overflow-y-auto">
           <ScrollArea>
-            {!isLoading &&
+            {!isFetching &&
               filteredConversations?.map((conversation) => (
                 <DashboardCard
                   key={conversation.id}
@@ -195,7 +190,7 @@ function Dashboard() {
                   conversation_id={conversation.id}
                 />
               ))}
-            {isLoading && (
+            {isFetching && (
               <DashboardCard
                 key=""
                 title=""

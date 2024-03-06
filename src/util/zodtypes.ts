@@ -13,6 +13,10 @@ export const newConversation = z
     path: ["model"],
   });
 
+export const newMessage = z.object({
+  messsage: z.string().min(1),
+});
+
 export const login = z
   .object({
     email: z.string().email(),
@@ -29,7 +33,9 @@ export const register = z.object({
   password: z.string().min(6),
 });
 
-const conversationMessageInput = z.object({}); // TODO: work on this
+export const conversationMessageInput = z.object({
+  message: z.string().min(1),
+});
 
 export type NewConversation = z.infer<typeof newConversation>;
 export type Login = z.infer<typeof login>;
