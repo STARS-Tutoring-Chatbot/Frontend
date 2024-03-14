@@ -45,7 +45,9 @@ function Login() {
   const handleLoginSSOPress = () => {};
 
   // redirects to new route called create account
-  const handleCreateAccountPress = () => {};
+  const handleCreateAccountPress = () => {
+    navigate("/CreateAccount");
+  };
 
   // Do not use
   const handleLogOutPress = async () => {

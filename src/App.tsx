@@ -7,12 +7,13 @@ import Landing from "./pages/landing";
 import NavbarLayout from "./pages/conversation/conversationLayout";
 import MessageWindow from "./pages/conversation/messageWindow";
 import ConversationDashboard from "./pages/conversation/conversationDashboard";
-
+import CreateAccount from "./pages/login/CreateAccount"; // My import here
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path = "/CreateAccount" element = {<CreateAccount />} />  //My addition here
       <Route element={<ProtectedRoutes />}>
         <Route element={<NavbarLayout />} path="/chat">
           <Route element={<ConversationDashboard />} path=""></Route>
