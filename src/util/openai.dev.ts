@@ -32,6 +32,7 @@ export async function getOpenAIResponse(
 
   var message: Tables<"Messages"> | null = null;
   var metadata: Tables<"OpenAI-Responses"> | null = null;
+  // rest
 
   const testPrompt =
     "Hello! You are my personal coding assistant! Whenever outputing code, please do not say the answer directly. Instead lead me in the correct direction! Also have a very nice tone :)";
