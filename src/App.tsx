@@ -6,7 +6,7 @@ import Login from "./pages/login/login";
 import Landing from "./pages/landing";
 import MessageWindow from "./pages/conversation/messageWindow";
 import Dashboard from "./pages/dashboard/dashboard";
-
+import CreateAccount from "./pages/login/CreateAccount"; // My import here
 // TODO: fix issue with routing and
 function App() {
   return (
@@ -14,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/CreateAccount" element={<CreateAccount />} />
         <Route element={<ProtectedRoutes />} path="chat">
           <Route element={<Dashboard />} path="" />
           <Route element={<MessageWindow />} path=":conversationid" />
