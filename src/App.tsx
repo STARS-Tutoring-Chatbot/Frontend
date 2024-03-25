@@ -14,7 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/CreateAccount" element={<CreateAccount />} />
+        <Route path="/create" element={<CreateAccount />} />
         <Route element={<ProtectedRoutes />} path="chat">
           <Route element={<Dashboard />} path="" />
           <Route element={<MessageWindow />} path=":conversationid" />

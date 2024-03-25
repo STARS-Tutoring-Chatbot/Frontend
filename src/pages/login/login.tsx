@@ -1,54 +1,83 @@
-import React, { ChangeEventHandler, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/util/authprovider";
 import { getSupabaseClient } from "@/util/supabase";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { login } from "@/util/zodtypes";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 const supabase = getSupabaseClient();
 
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
   const navigate = useNavigate();
   const auth = useAuth();
-
-  const handleUsernameFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setUsername(e.target.value);
-  };
-
-  const handlePasswordFieldChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setPassword(e.target.value);
-  };
+  const { toast } = useToast();
 
   // this either redirects to the messaging page or throws an error state
   const handleLoginPress = async () => {
-    const user = await supabase.auth.signInWithPassword({
+    const user = await supabase?.auth.signInWithPassword({
       email: username,
       password: password,
     });
     navigate("/chat");
   };
 
-  // Pops up a modal to reset password
-  const handleResetPasswordPress = () => {};
-
-  // TBD
-  const handleLoginSSOPress = () => {};
+  const form = useForm<z.infer<typeof login>>({
+    resolver: zodResolver(login),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    values: {
+      email: username,
+      password: password,
+    },
+  });
 
   // redirects to new route called create account
   const handleCreateAccountPress = () => {
-    navigate("/CreateAccount");
+    navigate("/create");
   };
 
-  // Do not use
-  const handleLogOutPress = async () => {
-    await supabase.auth.signOut();
+  const handleSubmit = async (values: z.infer<typeof login>) => {
+    await supabase?.auth
+      .signInWithPassword({
+        email: values.email,
+        password: values.password,
+      })
+      .then((res) => {
+        if (res.error) {
+          console.log(res.error);
+          form.setError("root", {
+            message: res.error.message,
+          });
+          throw new Error(res.error.message);
+        } else if (res.data) {
+          navigate("/chat");
+        }
+      })
+      .catch((e) => {
+        toast({
+          title: "❌ Error",
+          description: e.message,
+        });
+      });
   };
 
   useEffect(() => {
@@ -65,40 +94,59 @@ function Login() {
     <div className="w-full h-screen flex">
       <div className="p-16 w-full md:w-1/2 h-full bg-gray-800 md:block hidden">
         <span className="text-white text-5xl font-extrabold leading-10 font-inter">
-          FIU{" "}
-        </span>
-        <span className="text-white text-5xl font-light leading-10 font-inter">
-          STARS GPT
+          FIU STARS GPT
         </span>
       </div>
-      <div className="w-full md:w-1/2 h-full justify-center items-center">
-        <div>
-          <div className="w-96 text-gray-800 text-xl font-semibold ">
-            Login with Email
-          </div>
-          <Input placeholder="Email" onChange={handleUsernameFieldChange} />
-          <Input
-            placeholder="Password"
-            onChange={handlePasswordFieldChange}
-            type="password"
-          />
-          <div>
-            <Button onClick={handleLoginPress}>Log In</Button>
-            <Button onClick={handleResetPasswordPress} variant="ghost">
-              Reset Password
-            </Button>
-          </div>
-        </div>
+      <div className="w-full md:w-1/2 h-full flex flex-col justify-center items-center">
+        <Toaster />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="w-2/3">
+            <h1>Login</h1>
+            <div className="py-2" />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Password" type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="p-4" />
 
-        <div>
-          <Button onClick={handleLoginSSOPress}>Log In Through SSO</Button>
-          <Button onClick={handleCreateAccountPress} variant="secondary">
-            Create Account
-          </Button>
-          <Button onClick={handleLogOutPress} variant="destructive">
-            Log Out. This should be taken out in production
-          </Button>
-        </div>
+            <div className="flex space-x-4">
+              <Button type="submit" className="w-full">
+                Login
+              </Button>
+              <Button
+                onClick={() => {
+                  handleCreateAccountPress();
+                }}
+                className="w-full"
+                variant="outline"
+              >
+                Sign Up
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );

@@ -1,52 +1,79 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { getSupabaseClient } from "@/util/supabase";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { register } from "@/util/zodtypes";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/components/ui/use-toast";
 
 const supabase = getSupabaseClient();
 
 const CreateAccount = () => {
-  const [email, setEmail] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [agree, setAgree] = useState(false);
+
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value);
-  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value);
-  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value);
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value);
-  const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value);
-  const handleAgreeChange = (e: React.ChangeEvent<HTMLInputElement>) => setAgree(e.target.checked);
+  const handleSubmit = async (values: z.infer<typeof register>) => {
+    console.log(values);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      // Handle password mismatch
-      console.error('Passwords do not match');
-      return;
-    }
-    if (agree) {
-      // Create account logic
-      try {
-        const { user, error } = await supabase.auth.signUp({
-          email,
-          password,
+    await supabase?.auth
+      .signUp({
+        email: values.email,
+        password: values.password,
+      })
+      .then((res) => {
+        if (res.error) {
+          console.log(res.error);
+          form.setError("root", {
+            message: res.error.message,
+          });
+          throw new Error(res.error.message);
+        } else if (res.data) {
+          navigate("/login");
+        }
+      })
+      .catch((e) => {
+        toast({
+          title: "❌ Error",
+          description: e.message,
         });
-        if (error) throw error;
-        console.log('User created:', user);
-        navigate('/login'); // Redirect to login page after account creation
-      } catch (error) {
-        console.error('Error creating user:', error);
-      }
-    } else {
-      // Handle disagreement
-      console.error('You must agree to the terms and conditions');
-    }
+      });
   };
+
+  const form = useForm<z.infer<typeof register>>({
+    resolver: zodResolver(register),
+    defaultValues: {
+      email: "",
+      confirmEmail: "",
+      password: "",
+      confirmPassword: "",
+      confirmed: true,
+    },
+    values: {
+      email: email,
+      confirmEmail: confirmEmail,
+      password: password,
+      confirmPassword: confirmPassword,
+      confirmed: agree,
+    },
+  });
 
   return (
     <div className="w-full h-screen flex">
@@ -56,18 +83,103 @@ const CreateAccount = () => {
         </span>
       </div>
       <div className="w-full md:w-1/2 h-full flex flex-col justify-center items-center">
-        <form className="w-96" onSubmit={handleSubmit}>
-          <Input placeholder="Email" value={email} onChange={handleEmailChange} />
-          <Input placeholder="First Name" value={firstName} onChange={handleFirstNameChange} />
-          <Input placeholder="Last Name" value={lastName} onChange={handleLastNameChange} />
-          <Input placeholder="Password" type="password" value={password} onChange={handlePasswordChange} />
-          <Input placeholder="Confirm Password" type="password" value={confirmPassword} onChange={handleConfirmPasswordChange} />
-          <div className="flex items-center">
-            <input type="checkbox" checked={agree} onChange={handleAgreeChange} />
-            <span className="ml-2">Confirm Account Creation</span>
-          </div>
-          <Button type="submit">Create Account</Button>
-        </form>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="w-2/3">
+            <h1>Create Account</h1>
+            <div className="py-2" />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmEmail"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Confirm Email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Password" {...field} type="password" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Confirm Password"
+                      {...field}
+                      type="password"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="p-4" />
+            <FormField
+              name="confirmed"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      Confirm that you agree to the terms and conditions.
+                    </FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <div className="p-4" />
+            <div className="flex space-x-4">
+              <Button
+                onClick={() => {
+                  navigate("/login");
+                }}
+                variant="outline"
+                className="w-full"
+                type="submit"
+              >
+                Back
+              </Button>
+              <Button type="submit" className="w-full">
+                Submit
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );
