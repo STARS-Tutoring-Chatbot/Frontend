@@ -96,9 +96,6 @@ function DashboardCard({
         <CardFooter />
       </div>
       <div className="flex-none flex items-center py-1 icon-container ">
-        <Button variant="ghost" onClick={onTrashClick} className="h-full">
-          <TrashIcon width={24} height={24} />
-        </Button>
         <Button
           variant="ghost"
           onClick={onGoToConversationClick}
