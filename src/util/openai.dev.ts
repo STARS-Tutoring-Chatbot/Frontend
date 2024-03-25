@@ -1,6 +1,7 @@
 import { OpenAI } from "openai";
 import { Tables } from "./supabase";
 import { v4 as uuidv4 } from "uuid";
+import { ReactMarkdown } from "react-markdown";
 
 const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPEN_AI_DEV_KEY,

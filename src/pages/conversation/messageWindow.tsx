@@ -12,6 +12,7 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import Notes from "./Notes";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import MessageComponent from "../chatbox/messageComponent";
 
 const supabase = getSupabaseClient();
 
@@ -148,7 +149,6 @@ function MessageWindow() {
       >
         <Notes conversationID={conversationid}></Notes>
       </Sheet>
-
       <div
         id="topbar"
         className="fixed top-0 flex-row w-full items-center space-x-2 bg-transparent z-10 px-4"
@@ -184,7 +184,6 @@ function MessageWindow() {
           </div>
         </div>
       </div>
-
       {!getInitialMessage.isFetching && (
         <ScrollArea className="mb-32 w-1/2 pt-4">
           {getInitialMessage.isLoading && <p>Preparing...</p>}
@@ -193,17 +192,9 @@ function MessageWindow() {
               return;
             }
             if (e.role == "assistant") {
-              return (
-                <div key={e.id} className="text-green-900 py-2">
-                  <p className="w-full">{e.content}</p>
-                </div>
-              );
+              return <MessageComponent key={e.id} message={e} />;
             } else {
-              return (
-                <div key={e.id} className="py-2">
-                  <b>{e.content}</b>
-                </div>
-              );
+              return <MessageComponent key={e.id} message={e} />;
             }
           })}
           {sendMessage.isPending && <p>Loading</p>}
@@ -226,6 +217,7 @@ function MessageWindow() {
           <Button
             onClick={() => {
               sendMessage.mutate();
+              console.log(messages);
             }}
             disabled={sendMessage.isPending || sendDisabled}
           >
