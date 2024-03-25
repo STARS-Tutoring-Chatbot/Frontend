@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Sheet } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import axios from "axios";
 
 import { v4 as uuidv4 } from "uuid";
 import Notes from "./Notes";
@@ -62,43 +63,54 @@ function MessageWindow() {
       messages.push(newMessage);
       setMessages(messages);
 
-      const openAIResponse = await getOpenAIResponse(
-        messages,
-        conversationid ?? ""
-      );
+      const result = await axios({
+        method: "post",
+        url: "http://127.0.0.1:8000/api/response",
+        data: messages,
+        params: {
+          conversation_id: conversationid,
+        },
+      }).then(async (res) => {
+        if (res.status != 200) {
+          throw new Error("Bad Request, Try Again later");
+        }
+        const openaiMetadata: Tables<"OpenAI-Responses"> = res.data.metadata;
+        const openAIResponseMessage: Tables<"Messages"> = res.data.message;
 
-      if (openAIResponse.message == null || openAIResponse.metadata == null) {
-        throw new Error("OpenAI response is null");
-      }
-      const openAIResponseMessage: Tables<"Messages"> | null =
-        openAIResponse.message;
-
-      const openaiMetadata: Tables<"OpenAI-Responses"> | null =
-        openAIResponse.metadata;
-
-      // @ts-ignore
-      const insertionResponse = await supabase
-        .from("Messages")
         // @ts-ignore
-        .insert([newMessage, openAIResponseMessage!]);
-      if (insertionResponse.error) {
-        throw insertionResponse.error;
-      }
-      // @ts-ignore
-      const openAI_insertionResponse = await supabase
-        .from("OpenAI-Responses")
-        .insert([openaiMetadata!]);
-      if (openAI_insertionResponse.error) {
-        throw openAI_insertionResponse.error;
-      }
+        const messagesInsertion = await supabase
+          ?.from("Messages")
+          // @ts-ignore
+          .insert([newMessage, openAIResponseMessage]);
 
-      return openAIResponse.message;
+        // @ts-ignore
+        const metadataInsertion = await supabase
+          ?.from("OpenAI-Responses")
+          .insert([openaiMetadata]);
+
+        //@ts-ignore
+        if (messagesInsertion.error || metadataInsertion.error) {
+          throw new Error("Failed to insert into database");
+        }
+
+        return {
+          metadata: openaiMetadata,
+          message: openAIResponseMessage,
+        };
+      });
+
+      return result;
     },
     onSuccess(data) {
       setUserInput("");
-      setMessages((previous) => [...previous, data]);
+      data;
+      setMessages((prev) => [...prev, data.message]);
     },
   });
+
+  useEffect(() => {
+    console.log(sendMessage.data?.message);
+  }, [sendMessage.data]);
 
   useEffect(() => {
     setMessages(getInitialMessage.data ?? []);

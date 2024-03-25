@@ -44,6 +44,10 @@ function Dashboard() {
   const navigate = useNavigate();
   const auth = useAuth();
 
+  useEffect(() => {
+    console.log(auth.session);
+  }, []);
+
   const { data, error, isFetching } = useQuery({
     queryKey: ["conversations"],
     queryFn: async () => {
@@ -132,7 +136,7 @@ function Dashboard() {
                 </div>
                 <Menubar>
                   <MenubarMenu>
-                    <Button variant="ghost" onClick={onSettingsPress}>
+                    <Button variant="ghost" disabled onClick={onSettingsPress}>
                       Settings
                     </Button>
                   </MenubarMenu>
