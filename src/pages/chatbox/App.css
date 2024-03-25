@@ -1,0 +1,58 @@
+.app-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.chat-box {
+  position: relative; 
+  width: 600px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.message {
+  position: relative; 
+  display: flex;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #000;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.message-content {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: bold;
+}
+
+.text {
+  margin-top: 5px;
+  max-width: 95ch;
+  word-wrap: break-word;
+}
+
+.code-block {
+  font-family: 'Courier New', monospace;
+  white-space: pre-wrap;
+}
+
+.time-date {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 10px;
+  color: #666;
+}
