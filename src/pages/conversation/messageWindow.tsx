@@ -25,11 +25,16 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { newMessage } from "@/util/zodtypes";
+import MessageComponentOtherStates from "../chatbox/messageComponentOtherStates";
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 const supabase = getSupabaseClient();
 
 function MessageWindow() {
   // TODO: figure out the performance
+
+  const { toast } = useToast();
 
   // TODO: figure out the message type
   const [messages, setMessages] = useState<Tables<"Messages">[]>([]);
@@ -156,6 +161,7 @@ function MessageWindow() {
 
   return (
     <div className="h-full flex justify-center items-center">
+      <Toaster />
       <Sheet
         open={openSheet}
         onOpenChange={(state) => {
@@ -216,24 +222,42 @@ function MessageWindow() {
               );
             }
           })}
-          {sendMessage.isPending && <p>Loading</p>}
-          {sendMessage.isError && <p>Error</p>}
+          {sendMessage.isPending && (
+            <MessageComponentOtherStates
+              isError={false}
+              errorMessage=""
+              isLoading={sendMessage.isPending}
+            />
+          )}
+          {sendMessage.isError && (
+            <MessageComponentOtherStates
+              isError={sendMessage.isError}
+              errorMessage=""
+              isLoading={false}
+            />
+          )}
           <div ref={lowestDiv} />
         </ScrollArea>
       )}
 
       <div
-        className="fixed flex inset-x-0 bottom-0 flex w-full items-center space-x-2 bg-white z-10 px-4 shadow-md border-t-2 border-gray-200 justify-center"
+        className="fixed flex inset-x-0 bottom-0 w-full items-center space-x-2  bg-transparent z-10 px-4 shadow-md justify-center bg-gradient-to-t from-white to-transparent"
         id="message-input"
       >
-        <div className="flex w-[1000px] items-center space-x-2 p-4 ">
+        <div className="flex w-[850px] items-center space-x-2 p-4 ">
           <Form {...form}>
             <form
               className="flex w-full items-center space-x-2"
               onSubmit={form.handleSubmit((values) => {
-                setUserInput(values.messsage);
-                form.reset();
-                sendMessage.mutate();
+                if (values.messsage.length != 0) {
+                  setUserInput(values.messsage);
+                  form.reset();
+                  sendMessage.mutate();
+                } else {
+                  toast({
+                    title: "❌ Message Can not be empty.",
+                  });
+                }
               })}
             >
               <FormField
@@ -244,7 +268,7 @@ function MessageWindow() {
                     <Textarea
                       {...field}
                       placeholder="Type your message here."
-                      className="w-full text-base block"
+                      className="w-full text-base block bg-slate-50"
                       rows={3}
                     />
                   </FormControl>
@@ -252,6 +276,7 @@ function MessageWindow() {
               />
               <Button
                 type="submit"
+                variant="outline"
                 disabled={sendMessage.isPending || sendMessage.isError}
               >
                 <Send size={14} />

@@ -15,15 +15,13 @@ function MessageComponentOtherStates({
   // Loading State
   if (isLoading) {
     // create loading component
-    return <div>MessageComponentOtherStates</div>;
+    return <div>LOADING</div>;
   }
   // error state
-  else if (isError || !isLoading) {
+  else if (isError) {
     if (errorMessage === "") {
       errorMessage = "Something went wrong.";
     }
-    // create error component
-    return <div>MessageComponentOtherStates</div>;
   }
 }
 
