@@ -10,24 +10,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from "axios";
 import { z } from "zod";
 
-import { memo } from "react";
-
 import { v4 as uuidv4 } from "uuid";
 import Notes from "./Notes";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import MessageComponent from "../chatbox/messageComponent";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { newMessage } from "@/util/zodtypes";
 import MessageComponentOtherStates from "../chatbox/messageComponentOtherStates";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { ModeToggle } from "@/components/ui/darkmodeToggle";
 
 const supabase = getSupabaseClient();
 
@@ -185,6 +178,7 @@ function MessageWindow() {
           </Button>
 
           <div id="topbar-button-group-left" className="flex space-x-2">
+            <ModeToggle />
             <Button
               variant="outline"
               onClick={() => {
@@ -241,7 +235,7 @@ function MessageWindow() {
       )}
 
       <div
-        className="fixed flex inset-x-0 bottom-0 w-full items-center space-x-2  bg-transparent z-10 px-4 shadow-md justify-center bg-gradient-to-t from-white to-transparent"
+        className="fixed flex inset-x-0 bottom-0 w-full items-center space-x-2  bg-transparent z-10 px-4 shadow-md justify-center bg-gradient-to-t from-background to-transparent"
         id="message-input"
       >
         <div className="flex w-[850px] items-center space-x-2 p-4 ">
@@ -268,7 +262,7 @@ function MessageWindow() {
                     <Textarea
                       {...field}
                       placeholder="Type your message here."
-                      className="w-full text-base block bg-slate-50"
+                      className="w-full text-base block "
                       rows={3}
                     />
                   </FormControl>

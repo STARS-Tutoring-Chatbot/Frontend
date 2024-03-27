@@ -16,6 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useNavigate } from "react-router-dom";
+import { ModeToggle } from "@/components/ui/darkmodeToggle";
 
 const supabase = getSupabaseClient();
 
@@ -121,7 +122,7 @@ function Dashboard() {
   const onSettingsPress = () => {};
 
   return (
-    <div className="flex justify-center overflow-none">
+    <div className="flex justify-center h-full">
       <div id="body" className="w-full md:w-1/2">
         <div id="utility-card" className="mt-8">
           <Card className="space-y-2">
@@ -135,6 +136,9 @@ function Dashboard() {
                   <p>FIU STARS Tutoring</p>
                 </div>
                 <Menubar>
+                  <MenubarMenu>
+                    <ModeToggle />
+                  </MenubarMenu>
                   <MenubarMenu>
                     <Button variant="ghost" disabled onClick={onSettingsPress}>
                       Settings
@@ -151,7 +155,7 @@ function Dashboard() {
 
             <CardContent>
               <div id="page-heading" className="mt-3">
-                <div className="text-black text-5xl font-extrabold leading-10 py-2">
+                <div className="text-5xl font-extrabold leading-10 py-2">
                   Your Conversations
                 </div>
                 <div>Signed in as {auth.user?.email}</div>
@@ -166,17 +170,15 @@ function Dashboard() {
                 className=""
               />
             </CardContent>
-
             <CardContent>
               <Button
                 className="w-full mb-6 space-x-2"
-                variant="default"
+                variant="outline"
                 onClick={() => {
                   setNewConversationDialogOpen(true);
                 }}
               >
-                <Plus size={16} />
-                <p>New Conversation</p>
+                <div>New Conversation</div>
               </Button>
             </CardContent>
           </Card>
