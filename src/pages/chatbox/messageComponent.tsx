@@ -1,18 +1,16 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tables } from "@/util/supabase";
 import React, { useState } from "react";
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  oneDark,
-  oneLight,
-  vs,
-  vscDarkPlus,
-  materialLight,
-  materialDark,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
+import rehypeRaw from "rehype-raw";
 
 type MessageComponentProps = {
-  message: Tables<"Messages">;
+  message?: Tables<"Messages">;
+  isLoading?: boolean;
 };
 
 function formatDateString(dateString: string): string {
@@ -26,60 +24,54 @@ function formatDateString(dateString: string): string {
 }
 
 const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
-  const dateConversion = formatDateString(message.created_at);
-
-  const [codeTheme, setCodeTheme] = useState(oneDark);
-
+  const dateConversion = formatDateString(message!.created_at);
   return (
-    <div className="py-2 w-full">
-      <div className="flex justify-between items-center">
+    <div className="py-2 w-[1000px] ">
+      <div id="header" className="flex justify-between items-center">
         <div className="text-xl font-semibold">
-          {message.role == "assistant" ? "Assistant" : "You"}
+          {message!.role == "assistant" ? "Assistant" : "You"}
         </div>
         <div className="text-gray-500 text-xs font-medium">
           {formatDateString(dateConversion)}
         </div>
       </div>
-      <div className="message-content">
-        <Markdown
-          className="w-full"
-          children={message.content}
-          components={{
-            div(props) {
-              const { children, ...rest } = props;
-              return (
-                <div className="w-full" {...rest}>
-                  {children}
-                </div>
-              );
-            },
-            code(props) {
-              const { children, className, node, ...rest } = props;
-              const match = /language-(\w+)/.exec(className || "");
-              return match ? (
-                <>
-                  <SyntaxHighlighter
-                    CodeTag={"div"}
-                    wrapLongLines
-                    showLineNumbers
-                    PreTag="div"
-                    children={String(children).replace(/\n$/, "")}
-                    language={match[1]}
-                    style={oneDark}
-                  />
-                  <div className="text-gray-500 text-sm pb-4">{match[1]}</div>
-                </>
-              ) : (
-                <code {...rest} className={className}>
-                  {children}
-                </code>
-              );
-            },
-          }}
-        />
+      <div id="content-container" className="flex">
+        <Skeleton className=" animate-none  h-auto p-[0.10rem] " />
+        <div id="content" className="ml-4">
+          <Markdown
+            className=""
+            children={message!.content}
+            remarkPlugins={[remarkMath]}
+            rehypePlugins={[rehypeKatex, rehypeRaw]}
+            components={{
+              code(props) {
+                const { children, className, node, ...rest } = props;
+                const match = /language-(\w+)/.exec(className || "");
+                return match ? (
+                  <>
+                    <SyntaxHighlighter
+                      CodeTag={"div"}
+                      wrapLongLines
+                      showLineNumbers
+                      PreTag="div"
+                      children={String(children).replace(/\n$/, "")}
+                      language={match[1]}
+                      style={oneDark}
+                    />
+                    <div className="text-gray-500 text-sm pb-4">{match[1]}</div>
+                  </>
+                ) : (
+                  <code {...rest} className={className}>
+                    {children}
+                  </code>
+                );
+              },
+              ul: (props) => <ul {...props} />,
+            }}
+          />
+        </div>
       </div>
     </div>
   );
 };
-
 export default MessageComponent;

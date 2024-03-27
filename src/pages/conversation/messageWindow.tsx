@@ -8,15 +8,29 @@ import { Sheet } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from "axios";
+import { z } from "zod";
+
+import { memo } from "react";
 
 import { v4 as uuidv4 } from "uuid";
 import Notes from "./Notes";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import MessageComponent from "../chatbox/messageComponent";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { newMessage } from "@/util/zodtypes";
 
 const supabase = getSupabaseClient();
 
 function MessageWindow() {
+  // TODO: figure out the performance
+
   // TODO: figure out the message type
   const [messages, setMessages] = useState<Tables<"Messages">[]>([]);
   const [userInput, setUserInput] = useState<string>("");
@@ -25,6 +39,15 @@ function MessageWindow() {
 
   const lowestDiv = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const form = useForm<z.infer<typeof newMessage>>({
+    defaultValues: {
+      messsage: "",
+    },
+    values: {
+      messsage: userInput,
+    },
+  });
 
   const { conversationid } = useParams();
 
@@ -110,10 +133,6 @@ function MessageWindow() {
   });
 
   useEffect(() => {
-    console.log(sendMessage.data?.message);
-  }, [sendMessage.data]);
-
-  useEffect(() => {
     setMessages(getInitialMessage.data ?? []);
   }, [getInitialMessage.data, conversationid]);
 
@@ -134,10 +153,6 @@ function MessageWindow() {
       });
     }
   }, [messages]);
-
-  function handleUserInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    setUserInput(e.target.value);
-  }
 
   return (
     <div className="h-full flex justify-center items-center">
@@ -185,44 +200,64 @@ function MessageWindow() {
         </div>
       </div>
       {!getInitialMessage.isFetching && (
-        <ScrollArea className="mb-32 w-1/2 pt-4">
+        <ScrollArea className="mb-32 w-[1000px] pt-4">
           {getInitialMessage.isLoading && <p>Preparing...</p>}
           {messages?.map((e) => {
             if (e.role == "system") {
               return;
             }
             if (e.role == "assistant") {
-              return <MessageComponent key={e.id} message={e} />;
+              return (
+                <MessageComponent key={e.id} isLoading={false} message={e} />
+              );
             } else {
-              return <MessageComponent key={e.id} message={e} />;
+              return (
+                <MessageComponent key={e.id} isLoading={false} message={e} />
+              );
             }
           })}
           {sendMessage.isPending && <p>Loading</p>}
+          {sendMessage.isError && <p>Error</p>}
           <div ref={lowestDiv} />
         </ScrollArea>
       )}
 
       <div
-        className="fixed inset-x-0 bottom-0 flex w-full items-center space-x-2 bg-white z-10 px-4 shadow-md border-t-2 border-gray-200"
+        className="fixed flex inset-x-0 bottom-0 flex w-full items-center space-x-2 bg-white z-10 px-4 shadow-md border-t-2 border-gray-200 justify-center"
         id="message-input"
       >
-        <div className="flex w-full items-center space-x-2 p-4">
-          <Textarea
-            placeholder="Type your message here."
-            className="w-full text-base block"
-            rows={3}
-            onChange={handleUserInput}
-            value={userInput}
-          />
-          <Button
-            onClick={() => {
-              sendMessage.mutate();
-              console.log(messages);
-            }}
-            disabled={sendMessage.isPending || sendDisabled}
-          >
-            <Send size={14} />
-          </Button>
+        <div className="flex w-[1000px] items-center space-x-2 p-4 ">
+          <Form {...form}>
+            <form
+              className="flex w-full items-center space-x-2"
+              onSubmit={form.handleSubmit((values) => {
+                setUserInput(values.messsage);
+                form.reset();
+                sendMessage.mutate();
+              })}
+            >
+              <FormField
+                control={form.control}
+                name="messsage"
+                render={({ field }) => (
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Type your message here."
+                      className="w-full text-base block"
+                      rows={3}
+                    />
+                  </FormControl>
+                )}
+              />
+              <Button
+                type="submit"
+                disabled={sendMessage.isPending || sendMessage.isError}
+              >
+                <Send size={14} />
+              </Button>
+            </form>
+          </Form>
         </div>
       </div>
     </div>

@@ -97,4 +97,14 @@
   h6 {
     @apply text-base font-medium;
   }
+  li {
+    margin-left: 2rem;
+    list-style-type: square;
+  }
+  li li {
+    list-style: circle;
+  }
+  li li li {
+    list-style: disc;
+  }
 }
