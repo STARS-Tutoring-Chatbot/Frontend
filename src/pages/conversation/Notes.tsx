@@ -20,6 +20,7 @@ import { Tables, getCurrentDate, getSupabaseClient } from "@/util/supabase";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/components/ui/use-toast";
+import { useTheme } from "@/util/themeprovider";
 
 type NotesProps = {
   conversationID: string | undefined;
@@ -29,9 +30,20 @@ type NotesProps = {
 function Notes({ conversationID }: NotesProps) {
   // @ts-ignore
   const [data, setData] = useState<Block[]>([]);
+  const [visualTheme, setVisualTheme] = useState<"dark" | "light">("light");
+
   const supabase = getSupabaseClient();
+  const { theme } = useTheme();
 
   const { toast, dismiss } = useToast();
+
+  useEffect(() => {
+    if (theme == "dark") {
+      setVisualTheme("dark");
+    } else if (theme == "light") {
+      setVisualTheme("light");
+    }
+  }, [theme]);
 
   // listen for when the user presses CTRL+S or ⌘+S
   useEffect(() => {
@@ -143,7 +155,16 @@ function Notes({ conversationID }: NotesProps) {
         </SheetDescription>
       </SheetHeader>
       <div className="p-2"></div>
-      {<BlockNoteView editor={editor} theme="light"></BlockNoteView>}
+      {
+        <BlockNoteView
+          editor={editor}
+          theme={visualTheme}
+          style={{
+            color: "red",
+            backgroundColor: "blue",
+          }}
+        ></BlockNoteView>
+      }
       <Toaster />
     </SheetContent>
   );

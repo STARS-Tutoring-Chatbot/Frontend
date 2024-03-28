@@ -46,28 +46,6 @@ function Landing() {
     }
   };
 
-  // controlling UI for chips
-  useEffect(() => {
-    var isSelectedFlags = [];
-    for (let index = 0; index < chips.length; index++) {
-      const element = chips[index].course_name;
-      if (element?.toLowerCase().includes(searchClass.toLowerCase())) {
-        isSelectedFlags.push(index);
-      }
-    }
-
-    if (searchClass.length > 3) {
-      isSelectedFlags.forEach((i) => {
-        // TODO: figure out how to highlight these
-        chips[i].isSelected = true;
-      });
-    } else {
-      chips.forEach((chip) => {
-        chip.isSelected = false;
-      });
-    }
-  }, [searchClass]);
-
   return (
     <div className="w-screen py-48  flex-col justify-center items-center gap-16 inline-flex">
       <div className=" h-60 flex-col justify-start items-center gap-8 inline-flex">
@@ -104,8 +82,26 @@ function Landing() {
           Computer Engineering. Check to see if your courses are offered!
         </div>
         <div className="w-96 h-10 justify-center items-start gap-4 inline-flex">
-          <Button>STARS Tutoring Schedule</Button>
-          <Button variant="outline">Register for Tutor Groups</Button>
+          <Button
+            onClick={() => {
+              // goto link outside of the app
+              window.open(
+                "https://stars.cs.fiu.edu/wp-content/uploads/sites/29/2024/02/STARS-Tutor-Schedule-Spring-2024_0228.pdf"
+              );
+            }}
+          >
+            STARS Tutoring Schedule
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              window.open(
+                "https://forms.office.com/pages/responsepage.aspx?id=qOV5rOTgS0OikiyJtcKDZsczU_SpiDNMnHfU_M_aFfFUNElHQldaSEkzTzdCSFBQVFAyRDZFMEJKSC4u"
+              );
+            }}
+          >
+            Register for Tutor Groups
+          </Button>
         </div>
 
         {/* <div className="w-96 text-center  text-2xl font-semibold  leading-loose">

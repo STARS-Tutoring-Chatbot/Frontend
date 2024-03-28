@@ -192,7 +192,7 @@ function MessageWindow() {
               onClick={() => {
                 setOpenSheet(true);
               }}
-              variant={"default"}
+              variant="outline"
             >
               <Pencil size={12} />
             </Button>
@@ -200,7 +200,7 @@ function MessageWindow() {
         </div>
       </div>
       {!getInitialMessage.isFetching && (
-        <ScrollArea className="mb-32 w-[1000px] pt-4">
+        <div className="mb-32 w-1/2 pt-4">
           {getInitialMessage.isLoading && <p>Preparing...</p>}
           {messages?.map((e) => {
             if (e.role == "system") {
@@ -231,7 +231,7 @@ function MessageWindow() {
             />
           )}
           <div ref={lowestDiv} />
-        </ScrollArea>
+        </div>
       )}
 
       <div

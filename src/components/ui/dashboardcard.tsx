@@ -77,21 +77,21 @@ function DashboardCard({
       <div className="flex-1">
         <CardHeader>
           <CardTitle>{title ?? <Skeleton />}</CardTitle>
-          <CardDescription>
+          <CardDescription className="pb-0">
             <div className="flex items-center space-x-1">
               <CalendarIcon />
-              <p className="px-1">Created {date}</p>
+              <div className="px-1 pb-0">Created {date}</div>
             </div>
             <div className="flex items-center space-x-1">
               <BrainIcon size={16} color="#6B7280" />
-              <p className="text-sm text-muted-foreground">
+              <div className="text-sm text-muted-foreground pb-0">
                 Using {model ?? "Generic Trained Model"}
-              </p>
+              </div>
             </div>
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>{description}</p>
+          <div className="pb-0">{description}</div>
         </CardContent>
         <CardFooter />
       </div>

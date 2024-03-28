@@ -3,10 +3,14 @@ import { Tables } from "@/util/supabase";
 import React, { useState } from "react";
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import rehypeKatex from "rehype-katex";
+import {
+  oneDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
+import rehypeKatex, { Options } from "rehype-katex";
 import remarkMath from "remark-math";
 import rehypeRaw from "rehype-raw";
+import { useTheme } from "@/util/themeprovider";
 
 type MessageComponentProps = {
   message?: Tables<"Messages">;
@@ -24,9 +28,10 @@ function formatDateString(dateString: string): string {
 }
 
 const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
+  const { theme } = useTheme();
   const dateConversion = formatDateString(message!.created_at);
   return (
-    <div className="py-2 w-[1000px] ">
+    <div className="py-2">
       <div id="header" className="flex justify-between items-center">
         <div className="text-xl font-semibold">
           {message!.role == "assistant" ? "Assistant" : "You"}
@@ -37,9 +42,8 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
       </div>
       <div id="content-container" className="flex">
         <Skeleton className=" animate-none  h-auto p-[0.10rem] " />
-        <div id="content" className="ml-4">
+        <div id="content" className="ml-4 max-w-full">
           <Markdown
-            className=""
             children={message!.content}
             remarkPlugins={[remarkMath]}
             rehypePlugins={[rehypeKatex, rehypeRaw]}
@@ -56,17 +60,19 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
                       PreTag="div"
                       children={String(children).replace(/\n$/, "")}
                       language={match[1]}
-                      style={oneDark}
+                      style={theme === "dark" ? oneDark : oneLight}
                     />
-                    <div className="text-gray-500 text-sm pb-4">{match[1]}</div>
+                    <div className="text-sm pb-4">{match[1]}</div>
                   </>
                 ) : (
-                  <code {...rest} className={className}>
+                  <code {...rest} className="bg-background text-wrap">
                     {children}
                   </code>
                 );
               },
-              ul: (props) => <ul {...props} />,
+              p(props) {
+                return <p className="text-wrap indent-8" {...props} />;
+              },
             }}
           />
         </div>

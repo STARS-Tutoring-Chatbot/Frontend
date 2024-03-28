@@ -135,7 +135,7 @@ function Dashboard() {
                 <div className="self-start h-full">
                   <p>FIU STARS Tutoring</p>
                 </div>
-                <Menubar>
+                <Menubar className="p-0">
                   <MenubarMenu>
                     <ModeToggle />
                   </MenubarMenu>

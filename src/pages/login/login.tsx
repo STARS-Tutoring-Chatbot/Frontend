@@ -91,12 +91,7 @@ function Login() {
 
   // TODO: continue working on layout and fix the button layouts.
   return (
-    <div className="w-full h-screen flex">
-      <div className="p-16 w-full md:w-1/2 h-full bg-gray-800 md:block hidden">
-        <span className="text-white text-5xl font-extrabold leading-10 font-inter">
-          FIU STARS GPT
-        </span>
-      </div>
+    <div className="w-full h-screen flex justify-center">
       <div className="w-full md:w-1/2 h-full flex flex-col justify-center items-center">
         <Toaster />
         <Form {...form}>
