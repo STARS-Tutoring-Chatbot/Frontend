@@ -137,7 +137,7 @@ function Dashboard() {
                 </div>
                 <Menubar className="p-0">
                   <MenubarMenu>
-                    <ModeToggle />
+                    <ModeToggle variant="ghost" />
                   </MenubarMenu>
                   <MenubarMenu>
                     <Button variant="ghost" disabled onClick={onSettingsPress}>

@@ -178,7 +178,7 @@ function MessageWindow() {
           </Button>
 
           <div id="topbar-button-group-left" className="flex space-x-2">
-            <ModeToggle />
+            <ModeToggle variant="outline" />
             <Button
               variant="outline"
               onClick={() => {
@@ -238,7 +238,7 @@ function MessageWindow() {
         className="fixed flex inset-x-0 bottom-0 w-full items-center space-x-2  bg-transparent z-10 px-4 shadow-md justify-center bg-gradient-to-t from-background to-transparent"
         id="message-input"
       >
-        <div className="flex w-[850px] items-center space-x-2 p-4 ">
+        <div className="flex w-1/2 items-center space-x-2 p-4 ">
           <Form {...form}>
             <form
               className="flex w-full items-center space-x-2"

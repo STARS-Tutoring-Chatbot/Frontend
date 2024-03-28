@@ -147,7 +147,7 @@ function Notes({ conversationID }: NotesProps) {
   });
 
   return (
-    <SheetContent side="notes" className="h-full">
+    <SheetContent side="notes" className="h-full !overflow-auto">
       <SheetHeader>
         <SheetTitle>Your Conversation Notes</SheetTitle>
         <SheetDescription>

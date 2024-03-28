@@ -71,7 +71,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
                 );
               },
               p(props) {
-                return <p className="text-wrap indent-8" {...props} />;
+                return <p className="text-wrap pb-4" {...props} />;
               },
             }}
           />
