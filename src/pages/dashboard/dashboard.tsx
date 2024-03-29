@@ -173,7 +173,6 @@ function Dashboard() {
             <CardContent>
               <Button
                 className="w-full mb-6 space-x-2"
-                variant="outline"
                 onClick={() => {
                   setNewConversationDialogOpen(true);
                 }}

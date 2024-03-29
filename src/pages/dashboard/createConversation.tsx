@@ -199,7 +199,9 @@ function CreateConversationDialog({
             )}
           />
           <div className="p-4" />
-          <Button type="submit">Submit</Button>
+          <Button type="submit" className="w-full">
+            Submit
+          </Button>
         </form>
       </Form>
     </DialogContent>
