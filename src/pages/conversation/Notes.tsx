@@ -147,26 +147,22 @@ function Notes({ conversationID }: NotesProps) {
   });
 
   return (
-    <SheetContent side="notes" className="h-full !overflow-auto">
-      <SheetHeader>
-        <SheetTitle>Your Conversation Notes</SheetTitle>
-        <SheetDescription>
-          We support Markdown! Press CTRL+S or ⌘+S to save your notes.
-        </SheetDescription>
-      </SheetHeader>
+    <div className="h-full !overflow-auto p-3">
+      <div id="header">
+        <h1>Your Conversation Notes</h1>
+        <div>We support Markdown! Press CTRL+S or ⌘+S to save your notes.</div>
+      </div>
       <div className="p-2"></div>
-      {
-        <BlockNoteView
-          editor={editor}
-          theme={visualTheme}
-          style={{
-            color: "red",
-            backgroundColor: "blue",
-          }}
-        ></BlockNoteView>
-      }
+      <BlockNoteView
+        editor={editor}
+        theme={visualTheme}
+        style={{
+          fontFamily: "monospace",
+          overflow: "scroll",
+        }}
+      ></BlockNoteView>
       <Toaster />
-    </SheetContent>
+    </div>
   );
 }
 
