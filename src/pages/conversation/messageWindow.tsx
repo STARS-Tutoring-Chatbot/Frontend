@@ -78,8 +78,7 @@ function MessageWindow() {
       const res = await supabase
         .from("Messages")
         .select("*")
-        .eq("conversation_id", conversationid ?? "")
-        .order("created_at");
+        .eq("conversation_id", conversationid ?? "");
 
       if (res.error) {
         throw res.error;
