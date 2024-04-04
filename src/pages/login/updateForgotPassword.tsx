@@ -4,12 +4,9 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/util/authprovider";
 import { getSupabaseClient } from "@/util/supabase";
 
 import { z } from "zod";
-import { forgotPasswordInitializer } from "@/util/zodtypes";
 import {
   Form,
   FormControl,
@@ -19,7 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Toaster } from "@/components/ui/toaster";
-import { useToast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 
 function UpdateForgotPassword() {

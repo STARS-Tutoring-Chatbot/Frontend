@@ -7,7 +7,6 @@ import {
   DialogDescription,
 } from "@radix-ui/react-dialog";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseClient } from "@/util/supabase";
 import z from "zod";
 import { useForm } from "react-hook-form";
@@ -91,6 +90,7 @@ function ChatSettings({ conversationid }: ChatSettingsProps) {
     mutationFn: async (data: any) => {
       await supabase
         ?.from("conversations")
+        //@ts-ignore
         .update(data)
         .eq("id", conversationid!)
         .then((res) => {

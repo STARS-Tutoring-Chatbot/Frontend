@@ -37,7 +37,7 @@ function MessageWindow() {
   // TODO: figure out the message type
   const [messages, setMessages] = useState<Tables<"Messages">[]>([]);
   const [userInput, setUserInput] = useState<string>("");
-  const [sendDisabled, setSendDisabled] = useState<boolean>(true);
+  const [_, setSendDisabled] = useState<boolean>(true);
   const [openSheet, setOpenSheet] = useState<boolean>(false);
   const [openSettings, setOpenSettings] = useState<boolean>(false);
 
@@ -54,6 +54,21 @@ function MessageWindow() {
   });
 
   const { conversationid } = useParams();
+
+  useQuery({
+    queryKey: ["checkConversationID"],
+    queryFn: async () => {
+      // @ts-ignore
+      const res = await supabase
+        .from("conversations")
+        .select()
+        .eq("id", conversationid ?? "");
+
+      if (res.error) {
+        navigate("/chat");
+      }
+    },
+  });
 
   // inital state
   const getInitialMessage = useQuery({
@@ -109,7 +124,7 @@ function MessageWindow() {
 
       const result = await axios({
         method: "post",
-        url: "http://127.0.0.1:8000/api/response",
+        url: `${import.meta.env.VITE_BACKEND_LINK}/api/response`,
         data: messages,
         params: {
           conversation_id: conversationid,
