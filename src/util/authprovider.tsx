@@ -20,7 +20,7 @@ export default function AuthProvider({ children }: any) {
       const {
         data: { session },
         error,
-      } = await supabase.auth.getSession();
+      } = await supabase!.auth.getSession();
       if (error) {
         throw error;
       } else {
@@ -32,7 +32,7 @@ export default function AuthProvider({ children }: any) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase!.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user);
       setLoading(false);
