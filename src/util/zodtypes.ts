@@ -42,7 +42,7 @@ export const register = z
   )
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ["confirmPassword"],
+    path: ["confirmPassword", "password"],
   })
   .refine((data) => data.email === data.confirmEmail, {
     message: "Emails don't match",
@@ -56,6 +56,32 @@ export const register = z
 export const conversationMessageInput = z.object({
   message: z.string().min(1),
 });
+
+export const conversationSettingsChange = z
+  .object({
+    title: z.string().min(10).max(100),
+    description: z.string().min(10).max(500),
+    model: z.string(),
+    tone: z.array(z.number()).length(1),
+  })
+  .refine((data) => data.model !== "", {
+    message: "Please select a model",
+    path: ["model"],
+  });
+
+export const forgotPasswordInitializer = z.object({
+  email: z.string().email(),
+});
+
+export const forgotPasswordUpdate = z
+  .object({
+    passwordReset: z.string().min(6),
+    confirmPasswordReset: z.string().min(6),
+  })
+  .refine((data) => data.passwordReset === data.confirmPasswordReset, {
+    message: "Passwords don't match",
+    path: ["confirmPasswordReset", "passwordReset"],
+  });
 
 export type NewConversation = z.infer<typeof newConversation>;
 export type Login = z.infer<typeof login>;

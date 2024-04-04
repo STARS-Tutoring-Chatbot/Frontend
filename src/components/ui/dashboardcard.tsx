@@ -76,7 +76,7 @@ function DashboardCard({
     <Card className="flex my-3">
       <div className="flex-1">
         <CardHeader>
-          <CardTitle>{title ?? <Skeleton />}</CardTitle>
+          <CardTitle className="pb-0">{title ?? <Skeleton />}</CardTitle>
           <CardDescription className="pb-0">
             <div className="flex items-center space-x-1">
               <CalendarIcon />
@@ -95,7 +95,7 @@ function DashboardCard({
         </CardContent>
         <CardFooter />
       </div>
-      <div className="flex-none flex items-center py-1 icon-container ">
+      <div className="flex-none flex items-center icon-container ">
         <Button
           variant="ghost"
           onClick={onGoToConversationClick}

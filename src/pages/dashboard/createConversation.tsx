@@ -29,6 +29,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
 import { OpenAIPromptMessage } from "@/util/openai.dev";
 import { useMutation } from "@tanstack/react-query";
+import { Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const supabase = getSupabaseClient();
 
@@ -42,9 +44,19 @@ function CreateConversationDialog({
   const [model, setModel] = useState<string>("");
   const [conversationName, setConversationName] = useState("");
   const [conversationDescription, setConversationDescription] = useState("");
+  const [isGPT4, setIsGPT4] = useState(false);
 
   const auth = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("Hello");
+    if (model.includes("gpt-4")) {
+      setIsGPT4(true);
+    } else {
+      setIsGPT4(false);
+    }
+  }, [model]);
 
   const createConversation = useMutation({
     mutationKey: ["conversations"],
@@ -115,6 +127,7 @@ function CreateConversationDialog({
       description: conversationDescription,
       model: model,
     },
+    mode: "onChange",
   });
 
   useEffect(() => {
@@ -174,19 +187,30 @@ function CreateConversationDialog({
                 <FormLabel>Description</FormLabel>
                 <FormControl>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      if (value.includes("gpt-4")) {
+                        setIsGPT4(true);
+                      } else {
+                        setIsGPT4(false);
+                      }
+                    }}
                     defaultValue={field.value}
+                    required
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select Model" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="GPT-3.5-Turbo">
+                      <SelectItem value="gpt-3.5-turbo">
                         GPT-3.5-Turbo
                       </SelectItem>
-                      <SelectItem value="OP-SYS-1-3.5">OP-SYS-1-3.5</SelectItem>
-                      <SelectItem value="DSA-1-3.5">DSA-1-3.5</SelectItem>
-                      <SelectItem value="PROG1-4.0">PROG1-4.0</SelectItem>
+                      <SelectItem value="gpt-4-turbo-preview">
+                        GPT-4-Turbo-Preview
+                      </SelectItem>
+                      <SelectItem value="gpt-4-0125-preview">
+                        GPT-4-0125-Preview
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -198,7 +222,20 @@ function CreateConversationDialog({
               </FormItem>
             )}
           />
-          <div className="p-4" />
+          <p>
+            {isGPT4 ? (
+              <Alert>
+                <Info />
+                <AlertTitle className="pb-0">You are using GPT-4</AlertTitle>
+                <AlertDescription>
+                  The GPT-4 model is a more accurate and powerful model.
+                  However, you will get longer response times.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              ""
+            )}
+          </p>
           <Button type="submit" className="w-full">
             Submit
           </Button>

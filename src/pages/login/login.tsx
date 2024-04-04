@@ -120,6 +120,19 @@ function Login() {
                   <FormControl>
                     <Input placeholder="Password" type="password" {...field} />
                   </FormControl>
+                  <div className="w-full flex justify-end">
+                    <Button
+                      variant={"link"}
+                      type="button"
+                      className="p-0"
+                      onClick={() => {
+                        navigate("/forgot");
+                      }}
+                    >
+                      Forgot Password?
+                    </Button>
+                  </div>
+
                   <FormMessage />
                 </FormItem>
               )}

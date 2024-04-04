@@ -7,6 +7,8 @@ import Landing from "./pages/landing";
 import MessageWindow from "./pages/conversation/messageWindow";
 import Dashboard from "./pages/dashboard/dashboard";
 import CreateAccount from "./pages/login/CreateAccount"; // My import here
+import ForgotPassword from "./pages/login/forgotPassword";
+import UpdateForgotPassword from "./pages/login/updateForgotPassword";
 // TODO: fix issue with routing and
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/create" element={<CreateAccount />} />
+        <Route path="/forgot" element={<ForgotPassword />}></Route>
+        <Route path="/forgot/update" element={<UpdateForgotPassword />} />
         <Route element={<ProtectedRoutes />} path="chat">
           <Route element={<Dashboard />} path="" />
           <Route element={<MessageWindow />} path=":conversationid" />

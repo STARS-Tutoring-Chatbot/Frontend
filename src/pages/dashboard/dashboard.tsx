@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SearchIcon, Plus } from "lucide-react";
+import { SearchIcon, Plus, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/util/authprovider";
 import { Dialog } from "@/components/ui/dialog";
 import CreateConversationDialog from "./createConversation";
@@ -17,6 +17,12 @@ import { ToastAction } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
 import { useNavigate } from "react-router-dom";
 import { ModeToggle } from "@/components/ui/darkmodeToggle";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const supabase = getSupabaseClient();
 
@@ -133,7 +139,7 @@ function Dashboard() {
                 className="justify-between items-center inline-flex w-full mt-6"
               >
                 <div className="self-start h-full">
-                  <p>FIU STARS Tutoring</p>
+                  <p></p>
                 </div>
                 <Menubar className="p-0">
                   <MenubarMenu>
@@ -141,12 +147,12 @@ function Dashboard() {
                   </MenubarMenu>
                   <MenubarMenu>
                     <Button variant="ghost" disabled onClick={onSettingsPress}>
-                      Settings
+                      <Settings size={20} />
                     </Button>
                   </MenubarMenu>
                   <MenubarMenu>
                     <Button variant="ghost" onClick={onLogOutPress}>
-                      Log Out
+                      <LogOut size={18} />
                     </Button>
                   </MenubarMenu>
                 </Menubar>
@@ -207,9 +213,18 @@ function Dashboard() {
               />
             )}
           </ScrollArea>
-          <Button className="w-full" variant="outline">
-            Deleted Conversations
-          </Button>
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger className="w-full">
+                <Button className="w-full" variant="outline" disabled>
+                  Deleted Conversations
+                </Button>
+                <TooltipContent>
+                  <p>Under Construction</p>
+                </TooltipContent>
+              </TooltipTrigger>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <div className="h-[200px] w-100"></div>
       </div>

@@ -1,6 +1,7 @@
 import { BlockNoteView, useBlockNote } from "@blocknote/react";
 
 import "@blocknote/react/style.css";
+import "./editorstyle.css";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -136,6 +137,7 @@ function Notes({ conversationID }: NotesProps) {
         );
       }
     },
+    initialContent: [],
   });
 
   useAutosave({
@@ -159,10 +161,7 @@ function Notes({ conversationID }: NotesProps) {
         <BlockNoteView
           editor={editor}
           theme={visualTheme}
-          style={{
-            color: "red",
-            backgroundColor: "blue",
-          }}
+          data-theming-css
         ></BlockNoteView>
       }
       <Toaster />

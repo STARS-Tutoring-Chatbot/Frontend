@@ -1,0 +1,4 @@
+/* Adds border and shadow to editor */
+.bn-container[data-theming-css] .bn-editor {
+  background-color: #c5161600;
+}

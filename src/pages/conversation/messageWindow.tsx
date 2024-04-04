@@ -1,15 +1,19 @@
 import { Textarea } from "@/components/ui/textarea";
-import { getOpenAIResponse } from "@/util/openai.dev";
-import { Database, Tables, getSupabaseClient } from "@/util/supabase";
+import { Tables, getSupabaseClient } from "@/util/supabase";
 import { Send, Pencil, ChevronLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Sheet } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from "axios";
 import { z } from "zod";
-
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { v4 as uuidv4 } from "uuid";
 import Notes from "./Notes";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -21,6 +25,7 @@ import MessageComponentOtherStates from "../chatbox/messageComponentOtherStates"
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { ModeToggle } from "@/components/ui/darkmodeToggle";
+import ChatSettings from "./chatSettings";
 
 const supabase = getSupabaseClient();
 
@@ -34,6 +39,7 @@ function MessageWindow() {
   const [userInput, setUserInput] = useState<string>("");
   const [sendDisabled, setSendDisabled] = useState<boolean>(true);
   const [openSheet, setOpenSheet] = useState<boolean>(false);
+  const [openSettings, setOpenSettings] = useState<boolean>(false);
 
   const lowestDiv = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -67,6 +73,22 @@ function MessageWindow() {
     },
   });
 
+  const getConversationData = useQuery({
+    queryKey: ["fetchConversationData"],
+    queryFn: async () => {
+      // @ts-ignore
+      const res = await supabase
+        .from("conversations")
+        .select()
+        .eq("id", conversationid ?? "");
+
+      if (res.error) {
+        throw res.error;
+      }
+      return res.data as Tables<"conversations">[];
+    },
+  });
+
   const sendMessage = useMutation({
     mutationKey: ["sendMessage"],
     mutationFn: async () => {
@@ -91,6 +113,7 @@ function MessageWindow() {
         data: messages,
         params: {
           conversation_id: conversationid,
+          model: getConversationData.data?.[0].model,
         },
       }).then(async (res) => {
         if (res.status != 200) {
@@ -155,6 +178,18 @@ function MessageWindow() {
   return (
     <div className="h-full flex justify-center items-center">
       <Toaster />
+
+      <Dialog
+        open={openSettings}
+        onOpenChange={(state) => {
+          setOpenSettings(state);
+        }}
+      >
+        <DialogContent>
+          <ChatSettings conversationid={conversationid ?? ""} />
+        </DialogContent>
+      </Dialog>
+
       <Sheet
         open={openSheet}
         onOpenChange={(state) => {
@@ -178,24 +213,53 @@ function MessageWindow() {
           </Button>
 
           <div id="topbar-button-group-left" className="flex space-x-2">
-            <ModeToggle variant="outline" />
-            <Button
-              variant="outline"
-              onClick={() => {
-                console.log(messages[0].content);
-                console.log(messages);
-              }}
-            >
-              Chat Settings
-            </Button>
-            <Button
-              onClick={() => {
-                setOpenSheet(true);
-              }}
-              variant="outline"
-            >
-              <Pencil size={12} />
-            </Button>
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger>
+                  <ModeToggle variant="outline" />
+                  <TooltipContent>
+                    <p>Change Visual Mode</p>
+                  </TooltipContent>
+                </TooltipTrigger>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger>
+                  <Button
+                    variant="outline"
+                    disabled
+                    onClick={() => {
+                      setOpenSettings(true);
+                    }}
+                  >
+                    Chat Settings
+                  </Button>
+                  <TooltipContent>
+                    <p>Under Construction</p>
+                  </TooltipContent>
+                </TooltipTrigger>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger>
+                  <Button
+                    onClick={() => {
+                      setOpenSheet(true);
+                    }}
+                    variant="outline"
+                  >
+                    <Pencil size={12} />
+                  </Button>
+                  <TooltipContent>
+                    <p>Conversation Notes</p>
+                  </TooltipContent>
+                </TooltipTrigger>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
       </div>
