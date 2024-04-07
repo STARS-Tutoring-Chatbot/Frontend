@@ -22,6 +22,7 @@ function MessageComponentOtherStates({
     if (errorMessage === "") {
       errorMessage = "Something went wrong.";
     }
+    return <div>ERROR</div>;
   }
 }
 
