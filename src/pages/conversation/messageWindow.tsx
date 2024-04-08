@@ -121,7 +121,15 @@ function MessageWindow() {
       messages.push(newMessage);
       setMessages(messages);
 
-      // TODO: PUSH user message to the database
+      const newMessagesInsertion = await supabase
+        ?.from("Messages")
+        // @ts-ignore
+        .insert([newMessage]);
+
+      // @ts-ignore
+      if (newMessagesInsertion.error) {
+        throw new Error("Failed to insert into database");
+      }
 
       const result = await axios({
         method: "post",
@@ -140,18 +148,19 @@ function MessageWindow() {
 
         // @ts-ignore
         // TODO: before openAI response, push user msg to DB
-        const messagesInsertion = await supabase
+        const openAIMessagesInsertion = await supabase
           ?.from("Messages")
           // @ts-ignore
-          .insert([newMessage, openAIResponseMessage]);
+          .insert([openAIResponseMessage]);
 
         // @ts-ignore
         const metadataInsertion = await supabase
           ?.from("OpenAI-Responses")
+          // @ts-ignore
           .insert([openaiMetadata]);
 
         //@ts-ignore
-        if (messagesInsertion.error || metadataInsertion.error) {
+        if (openAIMessagesInsertion.error || metadataInsertion.error) {
           throw new Error("Failed to insert into database");
         }
 
