@@ -26,6 +26,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { ModeToggle } from "@/components/ui/darkmodeToggle";
 import ChatSettings from "./chatSettings";
+import { send } from "process";
 
 const supabase = getSupabaseClient();
 
@@ -307,20 +308,10 @@ function MessageWindow() {
           {sendMessage.isError && (
             <MessageComponentOtherStates
               isError={sendMessage.isError}
-              errorMessage=""
+              errorMessage={sendMessage.error?.message}
               isLoading={false}
             />
           )}
-          <MessageComponentOtherStates
-            isError={false}
-            errorMessage=""
-            isLoading={true}
-          />
-          <MessageComponentOtherStates
-            isError={true}
-            errorMessage=""
-            isLoading={false}
-          />
           <div ref={lowestDiv} />
         </div>
       )}
