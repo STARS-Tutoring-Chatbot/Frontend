@@ -320,16 +320,7 @@ function MessageWindow() {
               isLoading={false}
             />
           )}
-          <MessageComponentOtherStates
-            isError={false}
-            errorMessage=""
-            isLoading={true}
-          />
-          <MessageComponentOtherStates
-            isError={true}
-            errorMessage=""
-            isLoading={false}
-          />
+
           <div ref={lowestDiv} />
         </div>
       )}
