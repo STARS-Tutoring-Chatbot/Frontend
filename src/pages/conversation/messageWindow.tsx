@@ -126,6 +126,11 @@ function MessageWindow() {
         // @ts-ignore
         .insert([newMessage]);
 
+      // @ts-ignore
+      if (newMessagesInsertion.error) {
+        throw new Error("Failed to insert into database");
+      }
+
       const result = await axios({
         method: "post",
         url: `${import.meta.env.VITE_BACKEND_LINK}/api/response`,
