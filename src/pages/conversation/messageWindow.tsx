@@ -121,6 +121,11 @@ function MessageWindow() {
       messages.push(newMessage);
       setMessages(messages);
 
+      const newMessagesInsertion = await supabase
+        ?.from("Messages")
+        // @ts-ignore
+        .insert([newMessage]);
+
       const result = await axios({
         method: "post",
         url: `${import.meta.env.VITE_BACKEND_LINK}/api/response`,
@@ -137,14 +142,16 @@ function MessageWindow() {
         const openAIResponseMessage: Tables<"Messages"> = res.data.message;
 
         // @ts-ignore
-        const messagesInsertion = await supabase
+        // TODO: before openAI response, push user msg to DB
+        const openAIMessagesInsertion = await supabase
           ?.from("Messages")
           // @ts-ignore
-          .insert([newMessage, openAIResponseMessage]);
+          .insert([openAIResponseMessage]);
 
         // @ts-ignore
         const metadataInsertion = await supabase
           ?.from("OpenAI-Responses")
+          // @ts-ignore
           .insert([openaiMetadata]);
 
         //@ts-ignore
