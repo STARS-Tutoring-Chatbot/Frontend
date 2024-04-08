@@ -160,7 +160,7 @@ function MessageWindow() {
           .insert([openaiMetadata]);
 
         //@ts-ignore
-        if (messagesInsertion.error || metadataInsertion.error) {
+        if (openAIMessagesInsertion.error || metadataInsertion.error) {
           throw new Error("Failed to insert into database");
         }
 
