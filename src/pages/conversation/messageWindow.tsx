@@ -121,6 +121,8 @@ function MessageWindow() {
       messages.push(newMessage);
       setMessages(messages);
 
+      // TODO: PUSH user message to the database
+
       const result = await axios({
         method: "post",
         url: `${import.meta.env.VITE_BACKEND_LINK}/api/response`,
@@ -137,6 +139,7 @@ function MessageWindow() {
         const openAIResponseMessage: Tables<"Messages"> = res.data.message;
 
         // @ts-ignore
+        // TODO: before openAI response, push user msg to DB
         const messagesInsertion = await supabase
           ?.from("Messages")
           // @ts-ignore
@@ -308,6 +311,16 @@ function MessageWindow() {
               isLoading={false}
             />
           )}
+          <MessageComponentOtherStates
+            isError={false}
+            errorMessage=""
+            isLoading={true}
+          />
+          <MessageComponentOtherStates
+            isError={true}
+            errorMessage=""
+            isLoading={false}
+          />
           <div ref={lowestDiv} />
         </div>
       )}
