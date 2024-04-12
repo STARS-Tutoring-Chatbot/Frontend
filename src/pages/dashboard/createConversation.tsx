@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/util/authprovider";
-import { getCurrentDate, getSupabaseClient } from "@/util/supabase";
+import { Tables, getCurrentDate, getSupabaseClient } from "@/util/supabase";
 import { newConversation } from "@/util/zodtypes";
 import React, { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -65,15 +65,18 @@ function CreateConversationDialog({
       let newMessageResponse;
       const uid = uuidv4();
       //@ts-ignore
+
+      const conversationInfo: Tables<"conversations"> = {
+        id: uid,
+        owner_id: auth.user?.id ?? "",
+        title: values.title,
+        description: values.description,
+        model: values.model,
+      };
+
       await supabase
         .from("conversations")
-        .insert({
-          id: uid,
-          owner_id: auth.user?.id ?? "",
-          title: values.title,
-          description: values.description,
-          model: values.model,
-        })
+        .insert([conversationInfo])
         .then((res) => {
           if (res.error) {
             throw new Error(res.error.message);
@@ -81,21 +84,21 @@ function CreateConversationDialog({
           newConversationResponse = res.data;
         });
 
-      //@ts-ignore
+      const systemMessages: Tables<"Messages"> = {
+        id: uuidv4(),
+        content:
+          OpenAIPromptMessage +
+          "\n\nTitle:" +
+          values.title +
+          "\n\n" +
+          values.description,
+        conversation_id: uid,
+        role: "system",
+        created_at: getCurrentDate(),
+      };
       await supabase
         .from("Messages")
-        .insert({
-          id: uuidv4(),
-          content:
-            OpenAIPromptMessage +
-            "\n\nTitle:" +
-            values.title +
-            "\n\n" +
-            values.description,
-          conversation_id: uid,
-          role: "system",
-          created_at: getCurrentDate(),
-        })
+        .insert([systemMessages])
         .then((res) => {
           if (res.error) {
             throw new Error(res.error.message);
