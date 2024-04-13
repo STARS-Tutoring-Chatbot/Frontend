@@ -205,13 +205,14 @@ function CreateConversationDialog({
                       <SelectValue placeholder="Select Model" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="gpt-4-turbo">Default Model</SelectItem>
                       <SelectItem value="gpt-3.5-turbo">
                         GPT-3.5-Turbo
                       </SelectItem>
-                      <SelectItem value="gpt-4-turbo-preview">
+                      <SelectItem disabled={true} value="gpt-4-turbo-preview">
                         GPT-4-Turbo-Preview
                       </SelectItem>
-                      <SelectItem value="gpt-4-0125-preview">
+                      <SelectItem disabled={true} value="gpt-4-0125-preview">
                         GPT-4-0125-Preview
                       </SelectItem>
                     </SelectContent>
