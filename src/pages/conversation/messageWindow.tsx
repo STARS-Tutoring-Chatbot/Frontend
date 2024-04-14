@@ -1,6 +1,6 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Tables, getSupabaseClient } from "@/util/supabase";
-import { Send, Pencil, ChevronLeft } from "lucide-react";
+import { Send, Pencil, ChevronLeft, MessageCircleWarning } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Sheet } from "@/components/ui/sheet";
@@ -26,6 +26,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import { ModeToggle } from "@/components/ui/darkmodeToggle";
 import ChatSettings from "./chatSettings";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const supabase = getSupabaseClient();
 
@@ -105,30 +106,32 @@ function MessageWindow() {
 
   const sendMessage = useMutation({
     mutationKey: ["sendMessage"],
-    mutationFn: async () => {
-      const newMessage: Tables<"Messages"> = {
-        content: userInput,
-        conversation_id: conversationid ?? "",
-        role: "user",
-        id: uuidv4(),
-        created_at: new Date(
-          Date.now() + 1000 * 60 * -new Date().getTimezoneOffset()
-        )
-          .toISOString()
-          .replace("T", " ")
-          .replace("Z", ""),
-      };
-      messages.push(newMessage);
-      setMessages(messages);
+    mutationFn: async (needsResend?: boolean | undefined) => {
+      if (!needsResend) {
+        const newMessage: Tables<"Messages"> = {
+          content: userInput,
+          conversation_id: conversationid ?? "",
+          role: "user",
+          id: uuidv4(),
+          created_at: new Date(
+            Date.now() + 1000 * 60 * -new Date().getTimezoneOffset()
+          )
+            .toISOString()
+            .replace("T", " ")
+            .replace("Z", ""),
+        };
+        messages.push(newMessage);
+        setMessages(messages);
 
-      const newMessagesInsertion = await supabase
-        ?.from("Messages")
+        const newMessagesInsertion = await supabase
+          ?.from("Messages")
+          // @ts-ignore
+          .insert([newMessage]);
+
         // @ts-ignore
-        .insert([newMessage]);
-
-      // @ts-ignore
-      if (newMessagesInsertion.error) {
-        throw new Error("Failed to insert into database");
+        if (newMessagesInsertion.error) {
+          throw new Error("Failed to insert into database");
+        }
       }
 
       const result = await axios({
@@ -320,6 +323,30 @@ function MessageWindow() {
               isLoading={false}
             />
           )}
+          {messages[messages.length - 1]?.role == "user" &&
+            !sendMessage.isPending && (
+              <Alert variant={"destructive"}>
+                <MessageCircleWarning />
+                <AlertTitle>Resend Last Message</AlertTitle>
+                <AlertDescription>
+                  <div className="pb-4">
+                    You must have exited from STARS before the bot could respond
+                    to your query. Please try again by clicking the resend
+                    button.
+                  </div>
+                  <Button
+                    className="w-full"
+                    variant="ghost"
+                    onClick={() => {
+                      // used to resend the message IFF the last message was from the user and not the assistant
+                      sendMessage.mutate(true);
+                    }}
+                  >
+                    Resend
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            )}
 
           <div ref={lowestDiv} />
         </div>
@@ -337,7 +364,7 @@ function MessageWindow() {
                 if (values.messsage.length != 0) {
                   setUserInput(values.messsage);
                   form.reset();
-                  sendMessage.mutate();
+                  sendMessage.mutate(false);
                 } else {
                   toast({
                     title: "❌ Message Can not be empty.",

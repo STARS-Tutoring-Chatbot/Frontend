@@ -17,6 +17,8 @@ import { BrainIcon } from "lucide-react";
 import { Button } from "./button";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "./skeleton";
+import { useMutation } from "@tanstack/react-query";
+import { getSupabaseClient } from "@/util/supabase";
 
 type DashboardCardProps = {
   title: string | null;
@@ -27,6 +29,7 @@ type DashboardCardProps = {
   isLoading?: boolean;
 };
 
+const supabase = getSupabaseClient();
 function DashboardCard({
   title,
   description,
@@ -40,7 +43,23 @@ function DashboardCard({
     // TODO: Implement delete conversation
   };
 
+  const updateRecents = useMutation({
+    mutationKey: ["dashboard/mostrecent"],
+    mutationFn: async () => {
+      await supabase
+        ?.from("conversations")
+        // @ts-ignore
+        .update({ last_viewed: new Date().toISOString() })
+        // @ts-ignore
+        .eq("id", conversation_id)
+        .then((res) => {
+          console.log(res);
+        });
+    },
+  });
+
   const onGoToConversationClick = () => {
+    updateRecents.mutate();
     navigate(`${conversation_id}`);
   };
 

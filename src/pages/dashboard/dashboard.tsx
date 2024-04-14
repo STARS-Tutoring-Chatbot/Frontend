@@ -42,6 +42,7 @@ function Dashboard() {
       created_at: "",
       id: "",
       owner_id: "",
+      last_viewed: "",
     },
   ]);
   const [search, setSearch] = useState("");
@@ -75,7 +76,7 @@ function Dashboard() {
     setConversations(data);
     setFilteredConversations(
       data?.sort((a, b) => {
-        if (a.created_at < b.created_at) {
+        if (a.last_viewed! < b.last_viewed!) {
           return 1;
         } else {
           return -1;

@@ -74,8 +74,9 @@ function CreateConversationDialog({
         model: values.model,
       };
 
-      await supabase
+      await supabase!
         .from("conversations")
+        //@ts-ignore
         .insert([conversationInfo])
         .then((res) => {
           if (res.error) {
@@ -96,8 +97,9 @@ function CreateConversationDialog({
         role: "system",
         created_at: getCurrentDate(),
       };
-      await supabase
+      await supabase!
         .from("Messages")
+        //@ts-ignore
         .insert([systemMessages])
         .then((res) => {
           if (res.error) {
