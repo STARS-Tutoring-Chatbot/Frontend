@@ -324,7 +324,8 @@ function MessageWindow() {
             />
           )}
           {messages[messages.length - 1]?.role == "user" &&
-            !sendMessage.isPending && (
+            !sendMessage.isPending &&
+            !sendMessage.isError && (
               <Alert variant={"destructive"}>
                 <MessageCircleWarning />
                 <AlertTitle>Resend Last Message</AlertTitle>
