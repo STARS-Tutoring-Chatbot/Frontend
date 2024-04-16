@@ -109,14 +109,14 @@ function CreateConversationDialog({
         });
 
       console.log({ newConversationResponse, newMessageResponse });
-      return { newConversationResponse, newMessageResponse };
+      return { newConversationResponse, newMessageResponse, uid };
     },
     onError: (error) => {
       console.log(error);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       setNewConversationDialogOpen(false);
-      navigate(0);
+      navigate(`/chat/${data.uid}`);
     },
   });
 

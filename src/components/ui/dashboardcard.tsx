@@ -92,7 +92,10 @@ function DashboardCard({
   }
 
   return (
-    <Card className="flex my-3">
+    <Card
+      className="flex my-3 hover:bg-accent hover:text-accent-foreground hover:cursor-pointer"
+      onClick={onGoToConversationClick}
+    >
       <div className="flex-1">
         <CardHeader>
           <CardTitle className="pb-0">{title ?? <Skeleton />}</CardTitle>
