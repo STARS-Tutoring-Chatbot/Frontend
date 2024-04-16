@@ -1,6 +1,12 @@
 import { Textarea } from "@/components/ui/textarea";
 import { Tables, getSupabaseClient } from "@/util/supabase";
-import { Send, Pencil, ChevronLeft, MessageCircleWarning } from "lucide-react";
+import {
+  Send,
+  Pencil,
+  ChevronLeft,
+  MessageCircleWarning,
+  Info,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Sheet } from "@/components/ui/sheet";
@@ -27,6 +33,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ModeToggle } from "@/components/ui/darkmodeToggle";
 import ChatSettings from "./chatSettings";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { InfoCircledIcon } from "@radix-ui/react-icons";
 
 const supabase = getSupabaseClient();
 
@@ -231,15 +238,48 @@ function MessageWindow() {
         id="topbar"
         className="fixed top-0 flex-row w-full items-center space-x-2 bg-transparent z-10 px-4"
       >
-        <div className="flex w-full items-center justify-between p-4">
-          <Button
-            variant="outline"
-            onClick={() => {
-              navigate(-1);
-            }}
-          >
-            <ChevronLeft size={20} />
-          </Button>
+        <div className="flex w-full justify-between p-4">
+          <div className="space-x-4">
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigate(-1);
+                    }}
+                  >
+                    <ChevronLeft size={20} />
+                  </Button>
+                  <TooltipContent>
+                    <p>Back to Dashboard</p>
+                  </TooltipContent>
+                </TooltipTrigger>
+              </Tooltip>
+            </TooltipProvider>
+
+            <TooltipProvider>
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger>
+                  <Button
+                    variant="outline"
+                    className="hover:bg-background cursor-default"
+                  >
+                    <Info size={20} />
+                    <div className="pl-4">Chat Info</div>
+                  </Button>
+                  <TooltipContent>
+                    <div className="space-x-3">
+                      <div>
+                        <b>Chat Title: </b>
+                        {getConversationData.data?.[0]?.title ?? ""}
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </TooltipTrigger>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
 
           <div id="topbar-button-group-left" className="flex space-x-2">
             <TooltipProvider>
@@ -293,7 +333,7 @@ function MessageWindow() {
         </div>
       </div>
       {!getInitialMessage.isFetching && (
-        <div className="mb-32 w-1/2 pt-4">
+        <div className="mb-32 w-1/2 pt-16">
           {getInitialMessage.isLoading && <p>Preparing...</p>}
           {messages?.map((e) => {
             if (e.role == "system") {
