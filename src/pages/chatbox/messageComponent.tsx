@@ -42,7 +42,7 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
       </div>
       <div id="content-container" className="flex">
         <Skeleton className=" animate-none  h-auto p-[0.10rem] " />
-        <div id="content" className="ml-4 max-w-full">
+        <div id="content" className="ml-4 md:max-w-full">
           <Markdown
             children={message!.content}
             remarkPlugins={[remarkMath]}
@@ -52,18 +52,20 @@ const MessageComponent: React.FC<MessageComponentProps> = ({ message }) => {
                 const { children, className, node, ...rest } = props;
                 const match = /language-(\w+)/.exec(className || "");
                 return match ? (
-                  <>
-                    <SyntaxHighlighter
-                      CodeTag={"div"}
-                      wrapLongLines
-                      showLineNumbers
-                      PreTag="div"
-                      children={String(children).replace(/\n$/, "")}
-                      language={match[1]}
-                      style={theme === "dark" ? oneDark : oneLight}
-                    />
-                    <div className="text-sm pb-4">{match[1]}</div>
-                  </>
+                  <div>
+                    <div className="w-[90vw] md:w-full">
+                      <SyntaxHighlighter
+                        CodeTag={"div"}
+                        wrapLongLines
+                        showLineNumbers
+                        PreTag="div"
+                        children={String(children).replace(/\n$/, "")}
+                        language={match[1]}
+                        style={theme === "dark" ? oneDark : oneLight}
+                      />
+                      <div className="text-sm pb-4">{match[1]}</div>
+                    </div>
+                  </div>
                 ) : (
                   <code {...rest} className="bg-background text-wrap">
                     {children}

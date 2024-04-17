@@ -257,28 +257,6 @@ function MessageWindow() {
                 </TooltipTrigger>
               </Tooltip>
             </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip delayDuration={0}>
-                <TooltipTrigger>
-                  <Button
-                    variant="outline"
-                    className="hover:bg-background cursor-default"
-                  >
-                    <Info size={20} />
-                    <div className="pl-4">Chat Info</div>
-                  </Button>
-                  <TooltipContent>
-                    <div className="space-x-3">
-                      <div>
-                        <b>Chat Title: </b>
-                        {getConversationData.data?.[0]?.title ?? ""}
-                      </div>
-                    </div>
-                  </TooltipContent>
-                </TooltipTrigger>
-              </Tooltip>
-            </TooltipProvider>
           </div>
 
           <div id="topbar-button-group-left" className="flex space-x-2">
@@ -295,18 +273,21 @@ function MessageWindow() {
 
             <TooltipProvider>
               <Tooltip delayDuration={0}>
-                <TooltipTrigger>
+                <TooltipTrigger className="">
                   <Button
                     variant="outline"
-                    disabled
-                    onClick={() => {
-                      setOpenSettings(true);
-                    }}
+                    className="hover:bg-background cursor-default"
                   >
-                    Chat Settings
+                    <Info size={20} />
+                    <div className="pl-4 hidden md:block">Chat Info</div>
                   </Button>
                   <TooltipContent>
-                    <p>Under Construction</p>
+                    <div className="space-x-3">
+                      <div>
+                        <b>Chat Title: </b>
+                        {getConversationData.data?.[0]?.title ?? ""}
+                      </div>
+                    </div>
                   </TooltipContent>
                 </TooltipTrigger>
               </Tooltip>
@@ -314,7 +295,7 @@ function MessageWindow() {
 
             <TooltipProvider>
               <Tooltip delayDuration={0}>
-                <TooltipTrigger>
+                <TooltipTrigger className="hidden md:block">
                   <Button
                     onClick={() => {
                       setOpenSheet(true);
@@ -333,7 +314,7 @@ function MessageWindow() {
         </div>
       </div>
       {!getInitialMessage.isFetching && (
-        <div className="mb-32 w-1/2 pt-16">
+        <div className="mb-32 pl-2 pr-2 md:pl-0 md:pr-0 md:w-1/2 pt-16">
           {getInitialMessage.isLoading && <p>Preparing...</p>}
           {messages?.map((e) => {
             if (e.role == "system") {
@@ -397,7 +378,7 @@ function MessageWindow() {
         className="fixed flex inset-x-0 bottom-0 w-full items-center space-x-2  bg-transparent z-10 px-4 shadow-md justify-center bg-gradient-to-t from-background to-transparent"
         id="message-input"
       >
-        <div className="flex w-1/2 items-center space-x-2 p-4 ">
+        <div className="flex w-full md:w-1/2 items-center space-x-2 p-4 ">
           <Form {...form}>
             <form
               className="flex w-full items-center space-x-2"

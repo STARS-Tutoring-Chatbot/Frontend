@@ -130,8 +130,8 @@ function Dashboard() {
 
   return (
     <div className="flex justify-center h-full">
-      <div id="body" className="w-full md:w-1/2">
-        <div id="utility-card" className="mt-8">
+      <div id="body" className="pt-2 pl-2 pr-2 md:w-1/2 md:pl-0 md:pr-0">
+        <div id="utility-card" className="md:mt-8">
           <Card className="space-y-2">
             <CardContent>
               {error && <Toaster />}
