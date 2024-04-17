@@ -7,6 +7,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
+import { ModeToggle } from "@/components/ui/darkmodeToggle";
 
 const supabase = getSupabaseClient();
 
@@ -47,64 +48,66 @@ function Landing() {
   };
 
   return (
-    <div className="w-screen py-48  flex-col justify-center items-center gap-16 inline-flex">
-      <div className=" h-60 flex-col justify-start items-center gap-8 inline-flex">
-        <div className="px-4 py-1  rounded-lg justify-start items-center gap-2.5 inline-flex">
-          <div className=" text-xs font-medium  leading-tight">🎉</div>
-          <div className=" text-xs font-medium  leading-tight">
-            Version Alpha 1.2
-          </div>
-        </div>
-        <div className="self-stretch h-28 flex-col justify-start items-center gap-4 flex">
-          <div className="self-stretch text-center  text-6xl font-extrabold  leading-none">
-            FIU STARS GPT
-          </div>
-          <div className="w-96  text-sm font-normal  leading-normal">
-            STAR’s in-house GPT trained with student’s data guaranteed to assist
-            you based on Professor Wells’ requirements.
-          </div>
-          <div className="self-stretch justify-center items-start gap-4 inline-flex">
-            <Button onClick={handleGetStartedPress}>Get Started!</Button>
-          </div>
-        </div>
+    <div className="flex flex-col w-full h-screen items-center">
+      <div className="flex w-full top-0 pt-4 px-4 justify-between">
+        <div></div>
+        <ModeToggle variant="outline"></ModeToggle>
       </div>
-
-      <div className="flex-col justify-start items-center gap-4 inline-flex">
-        <div className="self-stretch text-center  text-5xl font-extrabold leading-10">
-          STARS Tutoring
-        </div>
-        <div className="text-center  text-base font-normal leading-normal">
-          “Students in Technology, Academia, Research and Service”
-        </div>
-        <div className="w-96  text-sm font-normal leading-normal">
-          Need help in a class? STARS provides free peer tutoring in many of the
-          required courses for Computer Science, Information Technology, and
-          Computer Engineering. Check to see if your courses are offered!
-        </div>
-        <div className="w-96 h-10 justify-center items-start gap-4 inline-flex">
-          <Button
-            onClick={() => {
-              // goto link outside of the app
-              window.open(
-                "https://stars.cs.fiu.edu/wp-content/uploads/sites/29/2024/02/STARS-Tutor-Schedule-Spring-2024_0228.pdf"
-              );
-            }}
-          >
-            STARS Tutoring Schedule
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              window.open(
-                "https://forms.office.com/pages/responsepage.aspx?id=qOV5rOTgS0OikiyJtcKDZsczU_SpiDNMnHfU_M_aFfFUNElHQldaSEkzTzdCSFBQVFAyRDZFMEJKSC4u"
-              );
-            }}
-          >
-            Register for Tutor Groups
-          </Button>
+      <div className="md:w-1/3 pt-20 px-4 md:pt-48 md:px-0 space-y-10">
+        <div className="flex flex-col items-center space-y-2">
+          <h1 className="text-5xl md:text-6xl font-extrabold py-2 text-center">
+            FIU STARS GPT
+          </h1>
+          <p className="text-center">
+            STARS' in-house GPT trained with student’s data designed to maximixe
+            your learning experience by providing you with an LLM trained
+            specifically for your Computer Science coursework
+          </p>
+          <Button onClick={handleGetStartedPress}>Get Started!</Button>
         </div>
 
-        {/* <div className="w-96 text-center  text-2xl font-semibold  leading-loose">
+        <div className="flex flex-col space-y-2">
+          <Button
+            className="text-3xl font-extrabold leading-10 py-2 text-center"
+            variant={"link"}
+          >
+            STARS Tutoring
+          </Button>
+
+          <p className="text-center">
+            “Students in Technology, Academia, Research and Service”
+          </p>
+          <p className="text-center">
+            Need help in a class? STARS provides free peer tutoring in many of
+            the required courses for Computer Science, Information Technology,
+            and Computer Engineering. Check to see if your courses are offered!
+          </p>
+          <div className="flex flex-row space-x-4">
+            <Button
+              className="w-full"
+              onClick={() => {
+                // goto link outside of the app
+                window.open(
+                  "https://stars.cs.fiu.edu/wp-content/uploads/sites/29/2024/02/STARS-Tutor-Schedule-Spring-2024_0228.pdf"
+                );
+              }}
+            >
+              STARS Tutoring Schedule
+            </Button>
+            <Button
+              className="w-full"
+              variant="outline"
+              onClick={() => {
+                window.open(
+                  "https://forms.office.com/pages/responsepage.aspx?id=qOV5rOTgS0OikiyJtcKDZsczU_SpiDNMnHfU_M_aFfFUNElHQldaSEkzTzdCSFBQVFAyRDZFMEJKSC4u"
+                );
+              }}
+            >
+              Register for Tutor Groups
+            </Button>
+          </div>
+
+          {/* <div className="w-96 text-center  text-2xl font-semibold  leading-loose">
           Classes We Offer
           <Input
             placeholder="Search for classes (comma separated for multiple)"
@@ -123,6 +126,7 @@ function Landing() {
             />
           ))}
         </div> */}
+        </div>
       </div>
     </div>
   );
